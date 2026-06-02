@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, WritingPayload, WritingFeedback, MistakeCode } from "@/lib/types";
@@ -15,6 +16,8 @@ export default function WritingPage() {
   const [feedback, setFeedback] = useState<WritingFeedback | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [missionContentId, setMissionContentId] = useState<string | null>(null);
+  const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
 
   const [profile] = useProfile();
   const [, setMistakes] = useMistakes();
@@ -24,8 +27,19 @@ export default function WritingPage() {
   useEffect(() => {
     const all = contentForSkill("writing");
     setPrompts(all);
-    if (all.length > 0 && !selectedId) setSelectedId(all[0]!.id);
-  }, [selectedId]);
+    const requestedId = new URLSearchParams(window.location.search).get("contentId");
+    if (requestedId) {
+      const requested = getContentById(requestedId);
+      if (!requested || requested.skill !== "writing") {
+        setInvalidContentId(requestedId);
+        return;
+      }
+      setMissionContentId(requestedId);
+      setSelectedId(requestedId);
+      return;
+    }
+    if (all.length > 0) setSelectedId((current) => current ?? all[0]!.id);
+  }, []);
 
   const selected = selectedId ? getContentById(selectedId) : undefined;
   const payload = selected?.payload as WritingPayload | undefined;
@@ -96,14 +110,18 @@ export default function WritingPage() {
               <li key={p.id}>
                 <button
                   onClick={() => {
+                    if (missionContentId && p.id !== missionContentId) return;
                     setSelectedId(p.id);
                     setText("");
                     setFeedback(null);
                   }}
+                  disabled={missionContentId !== null && p.id !== missionContentId}
                   className={`w-full rounded border px-3 py-2 text-left text-small transition-colors ${
                     selectedId === p.id
                       ? "border-ink bg-paper-warm"
-                      : "border-line bg-paper-card hover:border-ink-subtle"
+                      : missionContentId !== null && p.id !== missionContentId
+                        ? "cursor-not-allowed border-line bg-paper-card opacity-50"
+                        : "border-line bg-paper-card hover:border-ink-subtle"
                   }`}
                 >
                   <div className="font-medium">{p.title}</div>
@@ -117,10 +135,21 @@ export default function WritingPage() {
         </aside>
 
         <section>
-          {!selected || !payload ? (
+          {invalidContentId ? (
+            <div className="card border-warn/40 bg-warn/5 p-5 text-small">
+              <p className="font-medium text-warn">Mission item not found.</p>
+              <p className="mt-2 text-ink-muted">This Writing mission item is unavailable or has the wrong skill type.</p>
+              <Link href="/daily" className="mt-4 inline-flex btn-ghost btn-sm">Back to Daily</Link>
+            </div>
+          ) : !selected || !payload ? (
             <p className="text-small text-ink-muted">Pick a prompt to start.</p>
           ) : (
             <div className="space-y-5">
+              {missionContentId && (
+                <div className="card border-accent/40 bg-accent/5 p-3 text-small text-accent">
+                  Mission item
+                </div>
+              )}
               <div>
                 <p className="label">Prompt</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>

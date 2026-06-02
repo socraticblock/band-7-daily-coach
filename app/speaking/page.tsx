@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, SpeakingPayload, SpeakingFeedback, MistakeCode } from "@/lib/types";
@@ -20,6 +21,8 @@ export default function SpeakingPage() {
   const [feedback, setFeedback] = useState<SpeakingFeedback | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [missionContentId, setMissionContentId] = useState<string | null>(null);
+  const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
 
   const [profile] = useProfile();
   const [, setMistakes] = useMistakes();
@@ -27,11 +30,21 @@ export default function SpeakingPage() {
   const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
-    setPrompts(contentForSkill("speaking"));
+    const all = contentForSkill("speaking");
+    setPrompts(all);
+    const requestedId = new URLSearchParams(window.location.search).get("contentId");
+    if (requestedId) {
+      const requested = getContentById(requestedId);
+      if (!requested || requested.skill !== "speaking") {
+        setInvalidContentId(requestedId);
+        return;
+      }
+      setMissionContentId(requestedId);
+      setSelectedId(requestedId);
+      return;
+    }
+    if (all.length > 0) setSelectedId((current) => current ?? all[0]!.id);
   }, []);
-  useEffect(() => {
-    if (prompts.length > 0 && !selectedId) setSelectedId(prompts[0]!.id);
-  }, [prompts, selectedId]);
   useEffect(() => {
     detectRecordingCapabilities().then(setCap);
   }, []);
@@ -145,16 +158,20 @@ export default function SpeakingPage() {
               <li key={p.id}>
                 <button
                   onClick={() => {
+                    if (missionContentId && p.id !== missionContentId) return;
                     setSelectedId(p.id);
                     setAudioUrl(null);
                     setTranscript("");
                     setFeedback(null);
                     setError(null);
                   }}
+                  disabled={missionContentId !== null && p.id !== missionContentId}
                   className={`w-full rounded border px-3 py-2 text-left text-small transition-colors ${
                     selectedId === p.id
                       ? "border-ink bg-paper-warm"
-                      : "border-line bg-paper-card hover:border-ink-subtle"
+                      : missionContentId !== null && p.id !== missionContentId
+                        ? "cursor-not-allowed border-line bg-paper-card opacity-50"
+                        : "border-line bg-paper-card hover:border-ink-subtle"
                   }`}
                 >
                   <div className="font-medium">Part {p.title.match(/Part (\d)/)?.[1]}</div>
@@ -168,10 +185,21 @@ export default function SpeakingPage() {
         </aside>
 
         <section className="space-y-5">
-          {!selected || !payload ? (
+          {invalidContentId ? (
+            <div className="card border-warn/40 bg-warn/5 p-5 text-small">
+              <p className="font-medium text-warn">Mission item not found.</p>
+              <p className="mt-2 text-ink-muted">This Speaking mission item is unavailable or has the wrong skill type.</p>
+              <Link href="/daily" className="mt-4 inline-flex btn-ghost btn-sm">Back to Daily</Link>
+            </div>
+          ) : !selected || !payload ? (
             <p className="text-small text-ink-muted">Pick a prompt.</p>
           ) : (
             <>
+              {missionContentId && (
+                <div className="card border-accent/40 bg-accent/5 p-3 text-small text-accent">
+                  Mission item
+                </div>
+              )}
               <div>
                 <p className="label">Part {payload.part}</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>

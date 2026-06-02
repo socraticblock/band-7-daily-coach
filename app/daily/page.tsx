@@ -173,6 +173,7 @@ export default function DailyPage() {
         <ol className="space-y-3">
           {mission.tasks.map((t, i) => {
             const content = getContentById(t.sourceContentId);
+            const taskHref = routeForTask(t);
             return (
               <li key={t.id} className="card p-5">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -194,15 +195,17 @@ export default function DailyPage() {
                   )}
                   {(t.status === "ready" || t.status === "started") && (
                     <>
-                      <Link
-                        href={routeForTask(t)}
-                        onClick={() => {
-                          if (t.status === "ready") startTask(t);
-                        }}
-                        className="btn-ghost btn-sm"
-                      >
-                        Open
-                      </Link>
+                      {taskHref && (
+                        <Link
+                          href={taskHref}
+                          onClick={() => {
+                            if (t.status === "ready") startTask(t);
+                          }}
+                          className="btn-ghost btn-sm"
+                        >
+                          Open
+                        </Link>
+                      )}
                       <button onClick={() => completeTask(t)} className="btn-ghost btn-sm">
                         Mark complete
                       </button>
@@ -227,21 +230,22 @@ export default function DailyPage() {
   );
 }
 
-function routeForTask(t: MissionTask): string {
+function routeForTask(t: MissionTask): string | null {
+  const contentParam = `?contentId=${encodeURIComponent(t.sourceContentId)}`;
   switch (t.skill) {
     case "writing":
-      return "/writing";
+      return `/writing${contentParam}`;
     case "speaking":
-      return "/speaking";
+      return `/speaking${contentParam}`;
     case "listening":
-      return "/listening";
+      return `/listening${contentParam}`;
     case "reading":
-      return "/reading";
+      return `/reading${contentParam}`;
     case "review":
       return "/mistakes";
     case "vocabulary":
     case "grammar":
-      return "/daily";
+      return null;
     default:
       return "/daily";
   }

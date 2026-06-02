@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, ListeningPayload, ListeningQuestion } from "@/lib/types";
@@ -14,14 +15,26 @@ export default function ListeningPage() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [checked, setChecked] = useState(false);
   const [cap, setCap] = useState<AudioPlaybackCapabilities | null>(null);
+  const [missionContentId, setMissionContentId] = useState<string | null>(null);
+  const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
   const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
-    setItems(contentForSkill("listening"));
+    const all = contentForSkill("listening");
+    setItems(all);
+    const requestedId = new URLSearchParams(window.location.search).get("contentId");
+    if (requestedId) {
+      const requested = getContentById(requestedId);
+      if (!requested || requested.skill !== "listening") {
+        setInvalidContentId(requestedId);
+        return;
+      }
+      setMissionContentId(requestedId);
+      setSelectedId(requestedId);
+      return;
+    }
+    if (all.length > 0) setSelectedId((current) => current ?? all[0]!.id);
   }, []);
-  useEffect(() => {
-    if (items.length > 0 && !selectedId) setSelectedId(items[0]!.id);
-  }, [items, selectedId]);
   useEffect(() => {
     setCap(detectAudioCapabilities());
   }, []);
@@ -61,15 +74,19 @@ export default function ListeningPage() {
               <li key={p.id}>
                 <button
                   onClick={() => {
+                    if (missionContentId && p.id !== missionContentId) return;
                     setSelectedId(p.id);
                     setAnswers({});
                     setShowTranscript(false);
                     setChecked(false);
                   }}
+                  disabled={missionContentId !== null && p.id !== missionContentId}
                   className={`w-full rounded border px-3 py-2 text-left text-small transition-colors ${
                     selectedId === p.id
                       ? "border-ink bg-paper-warm"
-                      : "border-line bg-paper-card hover:border-ink-subtle"
+                      : missionContentId !== null && p.id !== missionContentId
+                        ? "cursor-not-allowed border-line bg-paper-card opacity-50"
+                        : "border-line bg-paper-card hover:border-ink-subtle"
                   }`}
                 >
                   <div className="font-medium">{p.title}</div>
@@ -88,10 +105,21 @@ export default function ListeningPage() {
         </aside>
 
         <section className="space-y-5">
-          {!selected || !payload ? (
+          {invalidContentId ? (
+            <div className="card border-warn/40 bg-warn/5 p-5 text-small">
+              <p className="font-medium text-warn">Mission item not found.</p>
+              <p className="mt-2 text-ink-muted">This Listening mission item is unavailable or has the wrong skill type.</p>
+              <Link href="/daily" className="mt-4 inline-flex btn-ghost btn-sm">Back to Daily</Link>
+            </div>
+          ) : !selected || !payload ? (
             <p className="text-small text-ink-muted">Pick a listening set.</p>
           ) : (
             <>
+              {missionContentId && (
+                <div className="card border-accent/40 bg-accent/5 p-3 text-small text-accent">
+                  Mission item
+                </div>
+              )}
               <div>
                 <p className="label">Listening</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>
