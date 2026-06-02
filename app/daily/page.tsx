@@ -16,8 +16,8 @@ import {
   markContentStarted,
 } from "@/lib/app-state";
 import { loadAllContent, getContentById } from "@/lib/content-loader";
-import { generateDailyMission, checkOverrun } from "@/lib/mission-engine";
-import type { DailyMission, MissionTask } from "@/lib/types";
+import { generateDailyMission, checkOverrun, checkSkip } from "@/lib/mission-engine";
+import type { DailyMission, MissionTask, Skill } from "@/lib/types";
 
 export default function DailyPage() {
   const [profile, setProfile] = useProfile();
@@ -27,6 +27,7 @@ export default function DailyPage() {
   const [userContentState, setUserContentState] = useUserContentState();
   const [mission, setMission] = useState<DailyMission | null>(null);
   const [overrunNote, setOverrunNote] = useState<string | null>(null);
+  const [skipNote, setSkipNote] = useState<string | null>(null);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -88,8 +89,7 @@ export default function DailyPage() {
           : t,
       ),
     };
-    const allDone = updated.tasks.every((t) => t.status === "completed" || t.status === "skipped");
-    updated.status = allDone ? "completed" : "partially_completed";
+    updated.status = evaluateMissionStatus(updated.tasks);
     setMission(updated);
     if (task.skill !== "review") {
       setUserContentState((current) =>
@@ -100,43 +100,38 @@ export default function DailyPage() {
     // Persist
     const next = missions.filter((m) => m.date !== today);
     setMissions([...next, updated]);
-    // Update stats
-    const completed = updated.tasks.filter((t) => t.status === "completed").length;
-    const totalMin = updated.tasks
-      .filter((t) => t.status === "completed")
-      .reduce((s, t) => s + t.estimatedMinutes, 0);
     const todayKey = today;
     const nextStats = stats.filter((s) => s.date !== todayKey);
-    setStats([
-      ...nextStats,
-      {
-        date: todayKey,
-        missionsCompleted: allDone ? 1 : 0,
-        totalMinutes: totalMin,
-        mistakesSaved: 0,
-        mistakesReviewed: 0,
-        skillsCovered: Array.from(new Set(updated.tasks.map((t) => t.skill))),
-      },
-    ]);
-    if (allDone) {
+    setStats([...nextStats, buildDailyStats(todayKey, updated, mistakes)]);
+    if (updated.status === "completed") {
       setProfile(bumpStreak(profile, todayKey));
     }
   };
 
   const skipTask = (task: MissionTask) => {
     if (!mission) return;
+    const skippedThisMission = mission.tasks.filter((t) => t.status === "skipped").length;
+    const decision = checkSkip(task.skill, skippedThisMission, skippedThisWeek(missions, today));
+    if (decision.action === "deny") {
+      setSkipNote("You can skip one task in a mission. Complete or reschedule some real practice before skipping more.");
+      return;
+    }
+    setSkipNote(decision.action === "allow_with_warning" ? decision.message : null);
     const updated: DailyMission = {
       ...mission,
       tasks: mission.tasks.map((t) =>
         t.id === task.id ? { ...t, status: "skipped" } : t,
       ),
     };
+    updated.status = evaluateMissionStatus(updated.tasks);
     setMission(updated);
     if (task.skill !== "review") {
       setUserContentState((current) => markContentSkipped(current, task.sourceContentId));
     }
     const next = missions.filter((m) => m.date !== today);
     setMissions([...next, updated]);
+    const nextStats = stats.filter((s) => s.date !== today);
+    setStats([...nextStats, buildDailyStats(today, updated, mistakes)]);
   };
 
   if (!profile.onboarded) {
@@ -164,6 +159,12 @@ export default function DailyPage() {
       {overrunNote && (
         <div className="mb-4 card border-warn/40 bg-warn/5 p-4 text-small text-warn">
           {overrunNote}
+        </div>
+      )}
+
+      {skipNote && (
+        <div className="mb-4 card border-warn/40 bg-warn/5 p-4 text-small text-warn">
+          {skipNote}
         </div>
       )}
 
@@ -226,8 +227,66 @@ export default function DailyPage() {
           })}
         </ol>
       )}
+
+      {mission?.status === "partially_completed" && (
+        <div className="mt-4 card border-warn/40 bg-warn/5 p-4 text-small text-warn">
+          Partially completed. Finish at least one real task, keep skips to one or fewer, and complete due review tasks for a full mission streak.
+        </div>
+      )}
     </AppShell>
   );
+}
+
+function evaluateMissionStatus(tasks: MissionTask[]): DailyMission["status"] {
+  const anyProgress = tasks.some((t) => t.status === "started" || t.status === "completed" || t.status === "skipped");
+  const allResolved = tasks.every((t) => t.status === "completed" || t.status === "skipped");
+  const realTaskCompleted = tasks.some((t) => t.skill !== "review" && t.status === "completed");
+  const skippedCount = tasks.filter((t) => t.status === "skipped").length;
+  const reviewTasksCompleted = tasks
+    .filter((t) => t.skill === "review")
+    .every((t) => t.status === "completed");
+
+  if (allResolved && realTaskCompleted && skippedCount <= 1 && reviewTasksCompleted) {
+    return "completed";
+  }
+  return anyProgress ? "partially_completed" : "ready";
+}
+
+function buildDailyStats(date: string, mission: DailyMission, mistakes: ReturnType<typeof useMistakes>[0]) {
+  const completedTasks = mission.tasks.filter((t) => t.status === "completed");
+  const skippedTasks = mission.tasks.filter((t) => t.status === "skipped");
+  const minutesStudied = completedTasks.reduce((sum, t) => sum + t.estimatedMinutes, 0);
+  const mistakesSaved = mistakes.filter((m) => m.createdAt.slice(0, 10) === date).length;
+  const mistakesReviewed = mistakes.filter((m) => m.lastReviewedAt?.slice(0, 10) === date).length;
+
+  return {
+    date,
+    missionsCompleted: mission.status === "completed" ? 1 : 0,
+    totalMinutes: minutesStudied,
+    tasksCompleted: completedTasks.length,
+    tasksSkipped: skippedTasks.length,
+    missionsFullyCompleted: mission.status === "completed" ? 1 : 0,
+    missionsPartiallyCompleted: mission.status === "partially_completed" ? 1 : 0,
+    minutesStudied,
+    mistakesSaved,
+    mistakesReviewed,
+    skillsCovered: Array.from(new Set(completedTasks.filter((t) => t.skill !== "review").map((t) => t.skill))),
+  };
+}
+
+function skippedThisWeek(missions: DailyMission[], today: string): Record<Skill, number> {
+  const todayTime = new Date(today).getTime();
+  const weekStart = todayTime - 6 * 24 * 60 * 60 * 1000;
+  const counts: Partial<Record<Skill, number>> = {};
+  for (const mission of missions) {
+    const missionTime = new Date(mission.date).getTime();
+    if (Number.isNaN(missionTime) || missionTime < weekStart || missionTime > todayTime) continue;
+    for (const task of mission.tasks) {
+      if (task.status !== "skipped") continue;
+      counts[task.skill] = (counts[task.skill] ?? 0) + 1;
+    }
+  }
+  return counts as Record<Skill, number>;
 }
 
 function routeForTask(t: MissionTask): string | null {

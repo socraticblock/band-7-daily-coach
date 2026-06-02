@@ -13,9 +13,14 @@ export default function ProgressPage() {
   const [writingFB] = useWritingFeedback();
   const [speakingFB] = useSpeakingFeedback();
 
-  const completedMissions = missions.filter((m) => m.status === "completed" || m.status === "partially_completed").length;
+  const completedMissions = missions.filter((m) => m.status === "completed").length;
+  const partialMissions = missions.filter((m) => m.status === "partially_completed").length;
   const mastery = mistakes.filter((m) => m.mastered).length;
-  const totalMin = stats.reduce((s, x) => s + x.totalMinutes, 0);
+  const totalMin = stats.reduce((s, x) => s + (x.minutesStudied ?? x.totalMinutes), 0);
+  const tasksCompleted = stats.reduce((s, x) => s + (x.tasksCompleted ?? 0), 0);
+  const tasksSkipped = stats.reduce((s, x) => s + (x.tasksSkipped ?? 0), 0);
+  const mistakesSaved = stats.reduce((s, x) => s + x.mistakesSaved, 0);
+  const mistakesReviewed = stats.reduce((s, x) => s + x.mistakesReviewed, 0);
 
   const writingBands = writingFB.map((f) => f.practiceBandRange);
   const speakingBands = speakingFB.map((f) => f.practiceBandRange);
@@ -34,10 +39,14 @@ export default function ProgressPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Missions completed" value={completedMissions.toString()} />
+        <Stat label="Full missions" value={completedMissions.toString()} sub={`${partialMissions} partial`} />
         <Stat label="Streak" value={`${profile.streakDays} day${profile.streakDays === 1 ? "" : "s"}`} sub={`Longest ${profile.longestStreak}`} />
         <Stat label="Total study time" value={`${totalMin} min`} />
         <Stat label="Mistakes mastered" value={mastery.toString()} sub={`${mistakes.length - mastery} still in rotation`} />
+        <Stat label="Tasks completed" value={tasksCompleted.toString()} />
+        <Stat label="Tasks skipped" value={tasksSkipped.toString()} />
+        <Stat label="Mistakes saved" value={mistakesSaved.toString()} />
+        <Stat label="Mistakes reviewed" value={mistakesReviewed.toString()} />
       </div>
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
@@ -46,7 +55,7 @@ export default function ProgressPage() {
           {lastWriting ? (
             <>
               <div className="mt-1 text-subtitle font-semibold">
-                Band {BAND_NUMERIC[lastWriting.practiceBandRange[0]].toFixed(1)} – {BAND_NUMERIC[lastWriting.practiceBandRange[1]].toFixed(1)}
+                Band {BAND_NUMERIC[lastWriting.practiceBandRange[0]].toFixed(1)} - {BAND_NUMERIC[lastWriting.practiceBandRange[1]].toFixed(1)}
               </div>
               <p className="mt-1 text-tiny text-ink-subtle">From your last submission</p>
               <BandSparkline bands={writingBands} />
@@ -60,7 +69,7 @@ export default function ProgressPage() {
           {lastSpeaking ? (
             <>
               <div className="mt-1 text-subtitle font-semibold">
-                Band {BAND_NUMERIC[lastSpeaking.practiceBandRange[0]].toFixed(1)} – {BAND_NUMERIC[lastSpeaking.practiceBandRange[1]].toFixed(1)}
+                Band {BAND_NUMERIC[lastSpeaking.practiceBandRange[0]].toFixed(1)} - {BAND_NUMERIC[lastSpeaking.practiceBandRange[1]].toFixed(1)}
               </div>
               <p className="mt-1 text-tiny text-ink-subtle">From your last submission</p>
               <BandSparkline bands={speakingBands} />
@@ -79,7 +88,10 @@ export default function ProgressPage() {
               <tr>
                 <th className="px-4 py-3 text-left">Date</th>
                 <th className="px-4 py-3 text-right">Minutes</th>
-                <th className="px-4 py-3 text-right">Missions</th>
+                <th className="px-4 py-3 text-right">Full</th>
+                <th className="px-4 py-3 text-right">Partial</th>
+                <th className="px-4 py-3 text-right">Done</th>
+                <th className="px-4 py-3 text-right">Skipped</th>
                 <th className="px-4 py-3 text-left">Skills</th>
               </tr>
             </thead>
@@ -87,14 +99,17 @@ export default function ProgressPage() {
               {stats.slice(-14).reverse().map((s) => (
                 <tr key={s.date}>
                   <td className="px-4 py-3">{s.date}</td>
-                  <td className="px-4 py-3 text-right">{s.totalMinutes}</td>
-                  <td className="px-4 py-3 text-right">{s.missionsCompleted}</td>
-                  <td className="px-4 py-3 text-ink-muted">{s.skillsCovered.join(" · ")}</td>
+                  <td className="px-4 py-3 text-right">{s.minutesStudied ?? s.totalMinutes}</td>
+                  <td className="px-4 py-3 text-right">{s.missionsFullyCompleted ?? s.missionsCompleted}</td>
+                  <td className="px-4 py-3 text-right">{s.missionsPartiallyCompleted ?? 0}</td>
+                  <td className="px-4 py-3 text-right">{s.tasksCompleted ?? 0}</td>
+                  <td className="px-4 py-3 text-right">{s.tasksSkipped ?? 0}</td>
+                  <td className="px-4 py-3 text-ink-muted">{s.skillsCovered.join(" / ")}</td>
                 </tr>
               ))}
               {stats.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-6 text-center text-ink-muted">
+                  <td colSpan={7} className="px-4 py-6 text-center text-ink-muted">
                     Complete a daily mission to start tracking.
                   </td>
                 </tr>

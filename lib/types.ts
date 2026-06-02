@@ -359,6 +359,11 @@ export type DailyStats = {
   date: string; // YYYY-MM-DD
   missionsCompleted: number;
   totalMinutes: number;
+  tasksCompleted: number;
+  tasksSkipped: number;
+  missionsFullyCompleted: number;
+  missionsPartiallyCompleted: number;
+  minutesStudied: number;
   mistakesSaved: number;
   mistakesReviewed: number;
   skillsCovered: Skill[];

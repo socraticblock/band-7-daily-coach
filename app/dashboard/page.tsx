@@ -28,7 +28,7 @@ export default function DashboardPage() {
   const today = new Date().toISOString().slice(0, 10);
   const todaysMission = missions.find((m) => m.date === today);
   const dueCount = pickDailyReviewQueue(mistakes, 8).length;
-  const completedMissions = missions.filter((m) => m.status === "completed" || m.status === "partially_completed").length;
+  const completedMissions = missions.filter((m) => m.status === "completed").length;
 
   useEffect(() => {
     if (!profileHydrated || !profile.onboarded || todaysMission) return;
@@ -129,13 +129,16 @@ export default function DashboardPage() {
         <div className="mt-8">
           <h2 className="text-subtitle font-semibold">Recent activity</h2>
           <div className="mt-3 card divide-y divide-line">
-            {stats.slice(-5).reverse().map((s) => (
-              <div key={s.date} className="flex items-center justify-between p-4 text-small">
-                <span className="text-ink-muted">{s.date}</span>
-                <span>{s.missionsCompleted} mission{s.missionsCompleted === 1 ? "" : "s"}</span>
-                <span>{s.totalMinutes} min</span>
-              </div>
-            ))}
+            {stats.slice(-5).reverse().map((s) => {
+              const fullMissions = s.missionsFullyCompleted ?? s.missionsCompleted;
+              return (
+                <div key={s.date} className="flex items-center justify-between p-4 text-small">
+                  <span className="text-ink-muted">{s.date}</span>
+                  <span>{fullMissions} full mission{fullMissions === 1 ? "" : "s"}</span>
+                  <span>{s.minutesStudied ?? s.totalMinutes} min</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
