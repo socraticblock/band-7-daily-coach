@@ -2,7 +2,7 @@
 
 > Independent IELTS Academic preparation for students aiming for Band 7+ / C1-level English.
 
-A scalable product that starts private. Daily missions, rubric-anchored AI feedback, mistake memory, and active recall — built for computer-first IELTS practice from mid-2026 onwards.
+A scalable product that starts private. Daily missions, rubric-anchored AI feedback, mistake memory, and active recall - built for computer-first IELTS practice from mid-2026 onwards.
 
 ## North star (one page)
 
@@ -10,19 +10,19 @@ A scalable product that starts private. Daily missions, rubric-anchored AI feedb
 **First real tester:** one serious student. Product is not built only for that person.
 **What:** A daily coach that tells the student what to study, gives focused feedback, saves mistakes, and brings them back through active review.
 **Why:** Removes study-planning confusion. Builds consistent exam preparation.
-**30-day success:** The first tester completes 18–22 missions in 30 days and uses the Error Notebook repeatedly.
+**30-day success:** The first tester completes 18-22 missions in 30 days and uses the Error Notebook repeatedly.
 
 ## How the product beats "just ask ChatGPT"
 
-1. **Structure** — the app picks today's work, not the user.
-2. **Habit** — daily mission, streak, predictable rhythm.
-3. **Memory** — saved mistakes return through active recall.
-4. **Exam realism** — typed writing, audio, timers, answer fields, mock mode.
-5. **Personalization** — topic profile weighting without becoming niche-only.
+1. **Structure** - the app picks today's work, not the user.
+2. **Habit** - daily mission, streak, predictable rhythm.
+3. **Memory** - saved mistakes return through active recall.
+4. **Exam realism** - typed writing, audio, timers, answer fields, mock mode.
+5. **Personalization** - topic profile weighting without becoming niche-only.
 
 ## Status
 
-This is **V0.1 — prototype**. The daily loop is wired, the mission engine works, the mistake taxonomy is closed, the writing/speaking feedback flow runs end-to-end, the listening/reading trainers are stubbed. Content depth is intentionally thin (see roadmap below). TTS audio is not yet generated.
+This is **V0.1 - prototype**. The daily loop is wired, the mission engine works, the mistake taxonomy is closed, the writing/speaking feedback flow runs end-to-end, and the first four original Listening scripts are in place for MiniMax TTS generation. Content depth is intentionally thin. Listening becomes real audio practice after `npm run generate:listening-audio` creates the static MP3 files.
 
 V0.1 is suitable for testing the learning loop. It is **not yet a complete IELTS Band 7 preparation program**. See `docs/TRAINING-MATERIAL-AUDIT.md` for the content readiness audit.
 
@@ -51,17 +51,30 @@ Environment variables:
 ```bash
 MINIMAX_API_KEY=
 MINIMAX_MODEL=MiniMax-M3
+MINIMAX_TTS_MODEL=speech-2.8-hd
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_TRANSCRIPTION_MODEL=whisper-1
 NEXT_PUBLIC_DEMO_MODE=false
 ```
 
-`MINIMAX_API_KEY` and `MINIMAX_MODEL` are used for AI feedback. `OPENAI_API_KEY` is still available as a fallback for feedback and is required for speech transcription until a MiniMax STT path is added. `NEXT_PUBLIC_DEMO_MODE=true` enables structured mock feedback if API routes fail or no key is configured. Keep demo mode off for real student testing so missing API configuration is visible instead of silently returning fake feedback.
+`MINIMAX_API_KEY` and `MINIMAX_MODEL` are used for AI feedback. `MINIMAX_API_KEY` and `MINIMAX_TTS_MODEL` are also used by the offline Listening audio generator. `OPENAI_API_KEY` is still available as a fallback for feedback and is required for speech transcription until a MiniMax STT path is added. `NEXT_PUBLIC_DEMO_MODE=true` enables structured mock feedback if API routes fail or no key is configured. Keep demo mode off for real student testing so missing API configuration is visible instead of silently returning fake feedback.
+
+## Listening audio generation
+
+Listening audio is generated offline and committed as static files. Do not call MiniMax TTS from the browser.
+
+```bash
+cp .env.example .env.local
+# add MINIMAX_API_KEY locally
+npm run generate:listening-audio
+```
+
+The script reads `content/listening/bank.json`, uses `MINIMAX_TTS_MODEL` with a default of `speech-2.8-hd`, saves MP3s to `public/audio/listening/`, and updates each generated item with `/audio/listening/<exercise-id>.mp3`. If the key is missing, it fails before making TTS requests.
 
 ## Project structure
 
-```
+```text
 app/
   (public) /, /band-7, /how-it-works, /legal
   (app)    /onboarding, /dashboard, /daily,
@@ -70,33 +83,35 @@ app/
   api/     feedback (writing/speaking/classify),
            mission/generate, speech/transcribe
 lib/
-  types.ts                  — locked type unions
-  mistake-taxonomy.ts       — closed 30-code taxonomy
-  mission-engine.ts         — daily mission generation + fallback chain
-  spaced-repetition.ts      — Again/Almost/Mastered scheduling
-  content-loader.ts         — loads content from /content
-  audio-fallbacks.ts        — mobile audio + recording fallbacks
-  ai-prompts.ts             — locked AI system + user templates
-  ai-client.ts              — OpenAI wrapper with explicit demo/mock mode
-  app-state.ts              — localStorage-backed app state
-  storage.ts                — SSR-safe localStorage hook
+  types.ts                  - locked type unions
+  mistake-taxonomy.ts       - closed 30-code taxonomy
+  mission-engine.ts         - daily mission generation + fallback chain
+  spaced-repetition.ts      - Again/Almost/Mastered scheduling
+  content-loader.ts         - loads content from /content
+  audio-fallbacks.ts        - mobile audio + recording fallbacks
+  ai-prompts.ts             - locked AI system + user templates
+  ai-client.ts              - MiniMax/OpenAI wrapper with explicit demo/mock mode
+  app-state.ts              - localStorage-backed app state
+  storage.ts                - SSR-safe localStorage hook
 content/
-  writing-prompts.ts        — 15 prompts
-  speaking-prompts.ts       — 50 prompts (Part 1/2/3)
-  vocabulary.ts             — 100 items
-  grammar.ts                — 30 drills
-  listening/bank.json       — 2 listening sets
-  reading/bank.json         — 2 reading passages
+  writing-prompts.ts        - 15 prompts
+  speaking-prompts.ts       - 50 prompts (Part 1/2/3)
+  vocabulary.ts             - 100 items
+  grammar.ts                - 30 drills
+  listening/bank.json       - 4 original listening sets for TTS audio
+  reading/bank.json         - 2 reading passages
 docs/
-  TRAINING-MATERIAL-AUDIT.md — what is usable now vs missing for V1
+  TRAINING-MATERIAL-AUDIT.md - what is usable now vs missing for V1
 components/
-  ui/                       — design system (Button, Card, Disclaimer)
-  layout/                   — AppShell, PublicNav, PublicFooter
+  ui/                       - design system (Button, Card, Disclaimer)
+  layout/                   - AppShell, PublicNav, PublicFooter
+scripts/
+  generate-listening-audio.ts - offline MiniMax TTS generation
 ```
 
 ## Brand and legal
 
-- Brand: **Band 7 Daily Coach** (not "IELTS Daily Coach" — trademark risk).
+- Brand: **Band 7 Daily Coach** (not "IELTS Daily Coach" - trademark risk).
 - Use "IELTS" descriptively only.
 - The footer carries the independent-prep disclaimer.
 - No IELTS logos. No official-looking branding. No copied official test content.
@@ -111,27 +126,28 @@ components/
 - [x] Mistake taxonomy (30 codes, closed)
 - [ ] Classifier tested on 20 ambiguous mistakes
 - [ ] 20 listening scripts reviewed
-- [ ] TTS provider chosen (OpenAI / ElevenLabs / Azure)
+- [x] TTS provider chosen (MiniMax static generation)
 - [ ] First tester recruited (2-week commitment, calendar date)
 
 ## Roadmap
 
-**V0.1 — Prototype (this build)**
-Daily loop, 4 skill trainers, error notebook, mobile-friendly, AI feedback wired. Demo feedback is available only when `NEXT_PUBLIC_DEMO_MODE=true`.
+**V0.1 - Prototype (this build)**
+Daily loop, 4 skill trainers, error notebook, mobile-friendly, AI feedback wired, and four starter Listening exercises ready for static MiniMax TTS audio generation. Demo feedback is available only when `NEXT_PUBLIC_DEMO_MODE=true`.
 
-**V1 — Exam-complete, 3–4 weeks of content**
+**V1 - Exam-complete, 3-4 weeks of content**
 32+ listening exercises, 24+ reading passages, 40+ Task 1 prompts, 60+ Task 2 prompts, 300+ speaking prompts, 500+ vocab, 200+ grammar, 4 mini mocks, 2 full mocks, real TTS audio, real AI feedback.
 
-**V1.5 — 8–12 week program**
-Auth (Supabase), cross-device progress, 10–20 beta users, feedback history, content import tool.
+**V1.5 - 8-12 week program**
+Auth (Supabase), cross-device progress, 10-20 beta users, feedback history, content import tool.
 
-**V2 — Public product**
+**V2 - Public product**
 Payments, admin CMS, SEO pages, teacher review, mobile PWA, profession topic packs.
 
 ## What V0.1 does not include (yet)
 
-- Real TTS audio. The transcript is shown instead.
-- Listening/Reading content beyond 2 sets each. The Daily Mission will rotate through them quickly.
+- More than 4 Listening sets. V1 still requires 32+ listening exercises.
+- Static Listening audio unless `npm run generate:listening-audio` has been run with a local MiniMax key and the MP3s have been committed.
+- Reading content beyond 2 sets. The Daily Mission will rotate through it quickly.
 - Full mock exams.
 - Admin panel. Content is in static files; updates require a redeploy.
 - Payments. The product is private.
@@ -140,7 +156,7 @@ Payments, admin CMS, SEO pages, teacher review, mobile PWA, profession topic pac
 
 - 390px width supported
 - Tap-to-play audio when needed
-- Microphone permission errors handled with a clear "upload audio file" fallback
+- Microphone permission errors handled with a clear upload audio file fallback
 - Review cards sized for one-thumb use
 
 ## License

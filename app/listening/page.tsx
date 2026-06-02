@@ -38,12 +38,14 @@ export default function ListeningPage() {
     }
     if (all.length > 0) setSelectedId((current) => current ?? all[0]!.id);
   }, []);
+
   useEffect(() => {
     setCap(detectAudioCapabilities());
   }, []);
 
   const selected = typeof selectedId === "string" ? getContentById(selectedId) : undefined;
   const payload = selected?.payload as ListeningPayload | undefined;
+  const hasAudio = Boolean(payload?.audioUrl);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -137,9 +139,9 @@ export default function ListeningPage() {
               </li>
             ))}
           </ul>
-          {items.length <= 2 && (
+          {items.length < 32 && (
             <p className="mt-3 text-tiny text-warn">
-              V0.1 has {items.length} sets. V1 expands to 32-48.
+              V0.1 has {items.length} sets. V1 expands to 32+.
             </p>
           )}
         </aside>
@@ -170,17 +172,23 @@ export default function ListeningPage() {
 
               <div className="card p-5">
                 <p className="label">Audio</p>
-                <p className="mt-2 text-tiny text-ink-subtle">
-                  V0.1: audio is generated via TTS after the production pipeline. For now, the transcript is the script. Use the questions to practice locating answers in the text.
-                </p>
-                {cap && cap.recommendedAction === "tap_to_play" && (
-                  <p className="mt-2 text-tiny text-ink-subtle">
-                    On iOS, audio needs a tap to start. We&apos;ll use the official embedded player.
-                  </p>
+                {hasAudio ? (
+                  <>
+                    <audio src={payload.audioUrl} controls className="mt-3 w-full" preload="metadata" />
+                    <p className="mt-2 text-tiny text-ink-subtle">
+                      Transcript is for review after answering.
+                    </p>
+                    {cap && cap.recommendedAction === "tap_to_play" && (
+                      <p className="mt-2 text-tiny text-ink-subtle">
+                        On iOS, audio needs a tap to start.
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <div className="mt-3 rounded border border-warn/40 bg-warn/5 p-3 text-small text-warn">
+                    Audio is not available for this prototype item yet.
+                  </div>
                 )}
-                <p className="mt-3 text-tiny text-ink-subtle">
-                  <em>No audio file yet — TTS pipeline pending. Use the transcript to answer the questions.</em>
-                </p>
               </div>
 
               <ol className="space-y-4">
@@ -279,6 +287,9 @@ function AnswerReview({ q, userAnswer }: { q: ListeningQuestion; userAnswer: str
       {q.distractorNote && (
         <p className="text-tiny text-ink-subtle">Note: {q.distractorNote}</p>
       )}
+      {q.explanation && (
+        <p className="text-tiny text-ink-subtle">Explanation: {q.explanation}</p>
+      )}
     </div>
   );
 }
@@ -290,7 +301,7 @@ function normalize(s: string | undefined): string {
 function listeningMistakeCode(q: ListeningQuestion, userAnswer: string): MistakeCode {
   const answer = normalize(userAnswer);
   const correct = normalize(q.answer);
-  const combined = `${q.prompt} ${q.distractorNote ?? ""}`.toLowerCase();
+  const combined = `${q.prompt} ${q.distractorNote ?? ""} ${q.explanation ?? ""}`.toLowerCase();
   if (isNearSpelling(answer, correct)) return "L1";
   if (/\d/.test(q.answer) && answer !== correct) return "L2";
   if (q.distractorNote) return "L4";
@@ -301,7 +312,7 @@ function listeningMistakeCode(q: ListeningQuestion, userAnswer: string): Mistake
 function listeningExplanation(q: ListeningQuestion): string {
   return [
     q.evidenceTimestamp ? `Evidence timestamp: ${q.evidenceTimestamp}.` : "",
-    q.distractorNote ? `Note: ${q.distractorNote}` : "Review the answer wording carefully.",
+    q.explanation ?? (q.distractorNote ? `Note: ${q.distractorNote}` : "Review the answer wording carefully."),
   ].filter(Boolean).join(" ");
 }
 

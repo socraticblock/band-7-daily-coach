@@ -3,72 +3,88 @@
     "id": "listening-part1-001",
     "skill": "listening",
     "type": "listening_form_completion",
-    "title": "Part 1: Enquiring about a language course",
-    "topicTags": ["education", "language"],
+    "title": "Part 1: Exam preparation course enquiry",
+    "topicTags": ["education", "language", "exam-preparation"],
     "profileTags": ["general_academic", "education", "scholarship_applications"],
     "difficulty": "band6_0",
-    "estimatedMinutes": 7,
+    "estimatedMinutes": 8,
     "cooldownDays": 30,
     "reviewStatus": "approved",
     "copyrightStatus": "original",
     "payload": {
-      "transcript": "Receptionist: Good morning. Brighton Language Centre, how can I help?\nCaller: Hello, my name's Anna Sokolov. I'd like some information about your exam preparation courses, please.\nReceptionist: Of course. Could I take your name and a contact number?\nCaller: Yes — Anna Sokolov. My mobile is 07700 900 482.\nReceptionist: Thank you. Which exam are you preparing for?\nCaller: IELTS Academic. I need Band 7 for a master's programme.\nReceptionist: Right. We have a four-week intensive course starting on the 6th of July. Classes run Monday to Friday, 9.30 to 12.30.\nCaller: How much does it cost?\nReceptionist: The fee is 480 pounds, including all materials. We also have a mock test every Friday.\nCaller: That sounds good. Is there an enrolment deadline?\nReceptionist: Bookings close on the 28th of June.",
+      "transcript": "Receptionist: Good afternoon, Northbridge Language Centre. How can I help?\nStudent: Hello. I am calling about your exam preparation courses. My name is Lena Markovic.\nReceptionist: Certainly. Could you spell your surname for me?\nStudent: Yes, it is M-A-R-K-O-V-I-C.\nReceptionist: Thank you. Are you preparing for IELTS Academic or General Training?\nStudent: Academic. I need Band 7 for a postgraduate programme in September.\nReceptionist: We have a short intensive course and an evening course. The intensive one starts on Monday the 14th of July, but it is almost full.\nStudent: I work in the mornings, so evening classes would be better.\nReceptionist: In that case, the evening course starts on the 21st of July. Classes are on Tuesdays and Thursdays from 6:15 to 8:45.\nStudent: And how many students are in a class?\nReceptionist: Usually twelve, but we limit IELTS groups to ten.\nStudent: Good. What is the fee?\nReceptionist: It is 315 pounds for six weeks. That includes printed materials, but the mock test is extra.\nStudent: How much is the mock test?\nReceptionist: Thirty-five pounds if you book it with the course. Otherwise it is fifty.\nStudent: I will book it with the course, then.\nReceptionist: Fine. I need an email address.\nStudent: It is lena dot markovic at mailpoint dot com.\nReceptionist: Thank you. Finally, the booking deadline is the 9th of July, and we ask for a 50 pound deposit.",
       "questions": [
         {
           "id": "q1",
-          "prompt": "Complete the form below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\nName: Anna _______",
-          "answer": "Sokolov",
+          "prompt": "Complete the form. Write ONE WORD AND/OR A NUMBER for each answer.\n\nStudent surname: _______",
+          "answer": "Markovic",
           "type": "listening_form_completion",
-          "distractorNote": "Listen carefully for the spelling. The receptionist repeats the name.",
-          "evidenceTimestamp": "00:09"
+          "distractorNote": "The surname is spelled letter by letter after the student first says it.",
+          "explanation": "The student says and then spells the surname as M-A-R-K-O-V-I-C.",
+          "evidenceTimestamp": "00:10"
         },
         {
           "id": "q2",
-          "prompt": "Mobile number: _______",
-          "answer": "07700 900 482",
+          "prompt": "Exam type: IELTS _______",
+          "answer": "Academic",
           "type": "listening_form_completion",
-          "distractorNote": "Phone numbers must be transcribed exactly, including spaces.",
-          "evidenceTimestamp": "00:17"
+          "distractorNote": "General Training is mentioned as an option, but the student chooses Academic.",
+          "explanation": "The receptionist asks which IELTS type, and the student answers Academic.",
+          "evidenceTimestamp": "00:22"
         },
         {
           "id": "q3",
-          "prompt": "Exam: IELTS _______",
-          "answer": "Academic",
+          "prompt": "Evening course start date: _______ July",
+          "answer": "21st",
           "type": "listening_form_completion",
-          "distractorNote": "'Academic' distinguishes from 'General Training'.",
-          "evidenceTimestamp": "00:25"
+          "distractorNote": "The 14th is for the intensive course, not the evening course.",
+          "explanation": "The evening course, which fits the student's work schedule, begins on the 21st of July.",
+          "evidenceTimestamp": "00:42"
         },
         {
           "id": "q4",
-          "prompt": "Target band: _______",
-          "answer": "7",
+          "prompt": "Class time: 6:15 to _______",
+          "answer": "8:45",
           "type": "listening_form_completion",
-          "distractorNote": "Write just the number.",
-          "evidenceTimestamp": "00:27"
+          "distractorNote": "Do not confuse the class time with the later booking deadline.",
+          "explanation": "Classes are on Tuesdays and Thursdays from 6:15 to 8:45.",
+          "evidenceTimestamp": "00:47"
         },
         {
           "id": "q5",
-          "prompt": "Course start date: _______ July",
-          "answer": "6th",
+          "prompt": "Maximum class size: _______ students",
+          "answer": "10",
           "type": "listening_form_completion",
-          "distractorNote": "Ordinal numbers are common in Part 1 dates.",
-          "evidenceTimestamp": "00:36"
+          "distractorNote": "Twelve is the usual class size, but IELTS groups are limited to ten.",
+          "explanation": "The receptionist corrects the general number by saying IELTS groups are limited to ten.",
+          "evidenceTimestamp": "00:56"
         },
         {
           "id": "q6",
-          "prompt": "Course fee: £_______ (including materials)",
-          "answer": "480",
+          "prompt": "Course fee: GBP _______",
+          "answer": "315",
           "type": "listening_form_completion",
-          "distractorNote": "Don't confuse the fee with the deadline date.",
-          "evidenceTimestamp": "00:48"
+          "distractorNote": "The mock test prices are mentioned after the course fee.",
+          "explanation": "The six-week course costs 315 pounds, excluding the mock test.",
+          "evidenceTimestamp": "01:05"
         },
         {
           "id": "q7",
-          "prompt": "Booking deadline: _______ June",
-          "answer": "28th",
+          "prompt": "Mock test fee with course: GBP _______",
+          "answer": "35",
           "type": "listening_form_completion",
-          "distractorNote": "Deadline is a different number from the start date.",
-          "evidenceTimestamp": "00:55"
+          "distractorNote": "Fifty pounds is the price if the mock test is booked separately.",
+          "explanation": "The discounted mock-test fee is thirty-five pounds when booked with the course.",
+          "evidenceTimestamp": "01:12"
+        },
+        {
+          "id": "q8",
+          "prompt": "Booking deadline: _______ July",
+          "answer": "9th",
+          "type": "listening_form_completion",
+          "distractorNote": "The deposit is 50 pounds; the deadline is the 9th of July.",
+          "explanation": "At the end, the receptionist gives the booking deadline as the 9th of July.",
+          "evidenceTimestamp": "01:31"
         }
       ]
     }
@@ -76,53 +92,257 @@
   {
     "id": "listening-part2-001",
     "skill": "listening",
-    "type": "listening_multiple_choice",
-    "title": "Part 2: City library tour",
-    "topicTags": ["cities", "culture"],
-    "profileTags": ["general_academic"],
+    "type": "listening_note_completion",
+    "title": "Part 2: City library orientation",
+    "topicTags": ["cities", "library", "community"],
+    "profileTags": ["general_academic", "education"],
     "difficulty": "band6_5",
     "estimatedMinutes": 8,
     "cooldownDays": 30,
     "reviewStatus": "approved",
     "copyrightStatus": "original",
     "payload": {
-      "transcript": "Welcome to the Westgate City Library tour. My name is Helen, and I'll be guiding you this morning.\n\nThe library first opened in 1903, and the new extension was completed in 2015. As you can see, the original reading room has been kept exactly as it was, with the wooden panelling and brass lamps.\n\nThe tour will take about forty-five minutes. We'll start on the ground floor, where the reception desk and café are located. Please note that the café closes at 4 pm today, earlier than usual.\n\nIf you need to leave the group at any point, the reference desk on the first floor has maps of the building and information about upcoming events.\n\nThe library hosts a weekly reading group on Thursday evenings, and a monthly book sale on the first Saturday of each month. Members receive a ten percent discount on book-sale purchases.\n\nPhotography is allowed in the public areas only, and not in the rare-books section on the second floor. Thank you for your cooperation.\n\nThe tour ends in the courtyard garden, where you are welcome to stay. The garden is open until 6 pm.",
+      "transcript": "Welcome to the Westgate City Library orientation. I am Helen, the visitor services coordinator, and I will explain the main facilities before you explore the building.\n\nThe library opens at nine o'clock from Monday to Saturday. On Wednesdays it stays open until eight in the evening, mainly for students and shift workers. On Sundays only the ground-floor reading room is open, and it closes at two.\n\nWhen you enter, the information desk is on your left. New members should collect a card there before using the self-service machines. The cafe is opposite the desk. Please note that hot food is not allowed beyond the cafe area, although covered drinks may be taken into most study spaces.\n\nThe children's library is downstairs next to the lift. The local history room is on the first floor, beside the quiet study area. If you want newspapers from earlier than 1990, ask at the reference desk because those are stored on microfilm.\n\nThe computer room is popular, so each session is limited to one hour when other people are waiting. Printing is available there, but scanning is free only for library members.\n\nWe run two regular events. The reading circle meets every Thursday at 6:30, while the digital skills workshop is held on the first Saturday of each month. You need to book the workshop online because places are limited.\n\nFinally, photography is allowed in the entrance hall and cafe, but not in the quiet study area or the children's library. Please silence your phone before you go upstairs.",
       "questions": [
         {
           "id": "q1",
-          "prompt": "What year was the original library building completed?",
-          "answer": "1903",
-          "type": "listening_multiple_choice",
-          "options": ["1887", "1903", "1915", "2015"],
-          "distractorNote": "There are two years mentioned. The original building is the earlier one.",
-          "evidenceTimestamp": "00:18"
+          "prompt": "Complete the notes. Write NO MORE THAN TWO WORDS AND/OR A NUMBER.\n\nWednesday closing time: _______",
+          "answer": "8",
+          "type": "listening_note_completion",
+          "distractorNote": "The normal opening time is nine; Wednesday's late closing time is eight.",
+          "explanation": "The speaker says the library stays open until eight on Wednesdays.",
+          "evidenceTimestamp": "00:16"
         },
         {
           "id": "q2",
-          "prompt": "What time does the café close today?",
-          "answer": "4 pm",
-          "type": "listening_multiple_choice",
-          "options": ["3 pm", "4 pm", "5 pm", "6 pm"],
-          "distractorNote": "The tour guide says 'earlier than usual'. The garden closes later than the café.",
-          "evidenceTimestamp": "00:42"
+          "prompt": "New members collect a card at the _______ desk.",
+          "answer": "information",
+          "type": "listening_note_completion",
+          "distractorNote": "The reference desk is mentioned later for old newspapers.",
+          "explanation": "The information desk is on the left, and new members collect cards there.",
+          "evidenceTimestamp": "00:35"
         },
         {
           "id": "q3",
-          "prompt": "What benefit do library members receive?",
-          "answer": "10% discount on book sales",
-          "type": "listening_multiple_choice",
-          "options": ["Free coffee at the café", "Free entry to events", "10% discount on book sales", "Extended borrowing limits"],
-          "distractorNote": "Don't assume benefits not stated in the recording.",
-          "evidenceTimestamp": "01:15"
+          "prompt": "Hot food is only allowed in the _______.",
+          "answer": "cafe",
+          "type": "listening_note_completion",
+          "distractorNote": "Covered drinks may go into study spaces, but hot food cannot.",
+          "explanation": "The speaker says hot food is not allowed beyond the cafe area.",
+          "evidenceTimestamp": "00:42"
         },
         {
           "id": "q4",
-          "prompt": "Where is photography NOT allowed?",
-          "answer": "the rare-books section on the second floor",
+          "prompt": "The local history room is on the _______ floor.",
+          "answer": "first",
+          "type": "listening_note_completion",
+          "distractorNote": "The children's library is downstairs; local history is upstairs.",
+          "explanation": "The local history room is on the first floor beside the quiet study area.",
+          "evidenceTimestamp": "00:54"
+        },
+        {
+          "id": "q5",
+          "prompt": "Newspapers before 1990 are stored on _______.",
+          "answer": "microfilm",
+          "type": "listening_note_completion",
+          "distractorNote": "This is a storage format, not a room location.",
+          "explanation": "Older newspapers are available by asking at the reference desk because they are on microfilm.",
+          "evidenceTimestamp": "01:02"
+        },
+        {
+          "id": "q6",
+          "prompt": "Computer sessions are limited to one hour when other people are _______.",
+          "answer": "waiting",
+          "type": "listening_note_completion",
+          "distractorNote": "The limit applies only when demand is high.",
+          "explanation": "The speaker says each computer session is limited when others are waiting.",
+          "evidenceTimestamp": "01:12"
+        },
+        {
+          "id": "q7",
+          "prompt": "The digital skills workshop must be booked _______.",
+          "answer": "online",
+          "type": "listening_note_completion",
+          "distractorNote": "The reading circle is regular, but the workshop requires booking.",
+          "explanation": "The workshop has limited places, so visitors need to book it online.",
+          "evidenceTimestamp": "01:28"
+        },
+        {
+          "id": "q8",
+          "prompt": "Photography is not allowed in the quiet study area or the _______ library.",
+          "answer": "children's",
+          "type": "listening_note_completion",
+          "distractorNote": "Photography is allowed in the entrance hall and cafe.",
+          "explanation": "The restricted areas are the quiet study area and the children's library.",
+          "evidenceTimestamp": "01:38"
+        }
+      ]
+    }
+  },
+  {
+    "id": "listening-part3-001",
+    "skill": "listening",
+    "type": "listening_multiple_choice",
+    "title": "Part 3: Seminar research project planning",
+    "topicTags": ["research", "education", "presentation"],
+    "profileTags": ["general_academic", "education", "technology_ai"],
+    "difficulty": "band7_0",
+    "estimatedMinutes": 10,
+    "cooldownDays": 30,
+    "reviewStatus": "approved",
+    "copyrightStatus": "original",
+    "payload": {
+      "transcript": "Tutor: So, Maya and Daniel, tell me how your seminar project is developing.\nMaya: We first wanted to compare online lectures with face-to-face lectures, but the topic felt too broad. Now we are focusing on how students use short revision videos before exams.\nDaniel: We also planned to survey the whole first-year group, but only forty students replied to our pilot questionnaire.\nTutor: Forty is acceptable for a small seminar project, but you need to be careful about your claims. What exactly will you measure?\nMaya: We thought about asking whether videos improve grades.\nTutor: That would be difficult unless you have access to reliable grade data and a control group.\nDaniel: So perhaps we should ask how students decide which videos to trust.\nTutor: That is more manageable. You could examine criteria such as the teacher's expertise, the length of the video, and whether examples are included.\nMaya: I like that. Daniel wanted to include production quality too, but I am not sure it matters academically.\nDaniel: I do not mean fancy editing. I mean clear sound and readable slides. In the pilot comments, several students said they stopped watching when the audio was poor.\nTutor: Then production quality is relevant, but define it narrowly. Do not turn the project into a media studies assignment.\nMaya: For the presentation, should we start with our survey results?\nTutor: Start with the problem. Explain why students rely on revision videos, then show your research question, method, and findings.\nDaniel: And the literature review?\nTutor: Keep it brief. Choose three sources only, and use them to frame your categories. Your biggest weakness at the moment is that your categories overlap. For example, a video can be short and also well explained.\nMaya: So we need clearer coding rules before analysing the responses.\nTutor: Exactly. Bring me one sample coded response next week, not a full draft.",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Why did the students change their original project topic?",
+          "answer": "It was too broad.",
           "type": "listening_multiple_choice",
-          "options": ["the courtyard garden", "the public reading areas", "the café", "the rare-books section on the second floor"],
-          "distractorNote": "Listen for the negative. 'Public areas only' is the rule.",
-          "evidenceTimestamp": "01:30"
+          "options": ["It was too broad.", "It required too many interviews.", "The tutor had already rejected it.", "They could not access online lectures."],
+          "distractorNote": "The low survey response is a separate issue, not the reason for changing the topic.",
+          "explanation": "Maya says the first idea, comparing online and face-to-face lectures, felt too broad.",
+          "evidenceTimestamp": "00:07"
+        },
+        {
+          "id": "q2",
+          "prompt": "What does the tutor say about using forty survey responses?",
+          "answer": "It can work if the claims are limited.",
+          "type": "listening_multiple_choice",
+          "options": ["It is too few to use.", "It can work if the claims are limited.", "It should be replaced by interviews.", "It proves the pilot questionnaire failed."],
+          "distractorNote": "The tutor says forty is acceptable, but warns them not to overclaim.",
+          "explanation": "The tutor calls forty acceptable for a small project, provided the claims are careful.",
+          "evidenceTimestamp": "00:24"
+        },
+        {
+          "id": "q3",
+          "prompt": "The tutor prefers the revised research question because it is",
+          "answer": "more practical to investigate.",
+          "type": "listening_multiple_choice",
+          "options": ["more original than the first idea.", "more practical to investigate.", "more closely linked to grades.", "more suitable for experiments."],
+          "distractorNote": "The tutor rejects the grade-improvement idea because it would need grade data and a control group.",
+          "explanation": "The tutor says asking how students decide which videos to trust is more manageable.",
+          "evidenceTimestamp": "00:44"
+        },
+        {
+          "id": "q4",
+          "prompt": "Daniel argues that production quality matters mainly because",
+          "answer": "poor audio can make students stop watching.",
+          "type": "listening_multiple_choice",
+          "options": ["students enjoy professional editing.", "poor audio can make students stop watching.", "it is the main topic of their seminar.", "it is easier to measure than expertise."],
+          "distractorNote": "Daniel rejects the idea that he means fancy editing.",
+          "explanation": "Daniel explains that he means clear sound and readable slides, and poor audio affected viewers in pilot comments.",
+          "evidenceTimestamp": "01:05"
+        },
+        {
+          "id": "q5",
+          "prompt": "What should the students do at the start of their presentation?",
+          "answer": "Explain the problem behind the research.",
+          "type": "listening_multiple_choice",
+          "options": ["Present all survey results.", "Summarise the literature review.", "Explain the problem behind the research.", "Compare their individual opinions."],
+          "distractorNote": "Maya suggests starting with survey results, but the tutor redirects them.",
+          "explanation": "The tutor tells them to start with the problem before the research question, method, and findings.",
+          "evidenceTimestamp": "01:26"
+        },
+        {
+          "id": "q6",
+          "prompt": "What is the tutor most concerned about in their current analysis?",
+          "answer": "Their categories are not clearly separated.",
+          "type": "listening_multiple_choice",
+          "options": ["Their literature review is too short.", "Their categories are not clearly separated.", "Their sample is too specialised.", "Their presentation has no findings."],
+          "distractorNote": "The tutor says to keep the literature review brief; the biggest weakness is overlapping categories.",
+          "explanation": "The tutor explicitly says their biggest weakness is that the categories overlap.",
+          "evidenceTimestamp": "01:45"
+        },
+        {
+          "id": "q7",
+          "prompt": "What does the tutor ask them to bring next week?",
+          "answer": "one sample coded response",
+          "type": "listening_note_completion",
+          "distractorNote": "The tutor says not to bring a full draft yet.",
+          "explanation": "The next step is one sample coded response, which will test whether their coding rules are clear.",
+          "evidenceTimestamp": "02:03"
+        }
+      ]
+    }
+  },
+  {
+    "id": "listening-part4-001",
+    "skill": "listening",
+    "type": "listening_sentence_completion",
+    "title": "Part 4: Lecture on urban green spaces",
+    "topicTags": ["environment", "cities", "public-health"],
+    "profileTags": ["general_academic", "environment_sustainability", "medicine_healthcare"],
+    "difficulty": "band7_0",
+    "estimatedMinutes": 10,
+    "cooldownDays": 30,
+    "reviewStatus": "approved",
+    "copyrightStatus": "original",
+    "payload": {
+      "transcript": "Lecturer: Today we are looking at urban green spaces, not simply as attractive features of a city, but as working infrastructure. By green spaces, I mean parks, street trees, community gardens, planted roofs, and small areas of vegetation beside roads or public buildings.\n\nHistorically, city parks were often designed for leisure and display. They gave residents somewhere pleasant to walk, but they were not usually measured in terms of public health or climate performance. That has changed. Planners now ask what a green space does, who can reach it, and whether it is maintained over time.\n\nOne benefit is temperature control. In summer, concrete and asphalt absorb heat during the day and release it slowly at night. Trees reduce this effect by providing shade and by releasing water vapour through their leaves. Even a narrow line of street trees can lower temperatures on a pavement, although the effect is stronger when trees are mature and planted continuously.\n\nA second benefit concerns water. Heavy rain can overwhelm drainage systems, especially in older cities. Soil and vegetation slow the movement of water and allow some of it to soak into the ground. This does not remove the need for engineered drains, but it can reduce pressure on them during storms.\n\nThere are also social and psychological benefits. Studies often link access to green space with lower stress and more physical activity. However, access is not only about distance. A park may be close on a map but feel unsafe, poorly lit, or difficult to enter for people with mobility needs. Quality and design therefore matter as much as the number of square metres.\n\nFinally, we should consider equity. Wealthier districts often have more tree cover and better-maintained parks. If cities invest only in already attractive areas, green infrastructure may increase inequality. Effective policy should prioritise neighbourhoods with high heat exposure, poor air quality, and limited recreational space.\n\nIn short, urban green spaces are not decorative extras. They are part of a city's health, climate, and social systems, but they only work well when location, maintenance, and fair access are planned together.",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Complete the sentences. Write NO MORE THAN TWO WORDS for each answer.\n\nThe lecturer describes urban green spaces as working _______.",
+          "answer": "infrastructure",
+          "type": "listening_sentence_completion",
+          "distractorNote": "The lecture contrasts infrastructure with attractive city features.",
+          "explanation": "At the start, the lecturer says green spaces should be seen as working infrastructure.",
+          "evidenceTimestamp": "00:06"
+        },
+        {
+          "id": "q2",
+          "prompt": "In the past, city parks were mainly associated with leisure and _______.",
+          "answer": "display",
+          "type": "listening_sentence_completion",
+          "distractorNote": "Public health and climate performance are modern ways of measuring parks.",
+          "explanation": "The historical purpose is described as leisure and display.",
+          "evidenceTimestamp": "00:28"
+        },
+        {
+          "id": "q3",
+          "prompt": "Trees cool streets by giving shade and releasing _______ through their leaves.",
+          "answer": "water vapour",
+          "type": "listening_sentence_completion",
+          "distractorNote": "The mechanism is not rainwater storage; it is water released by leaves.",
+          "explanation": "The lecturer names shade and water vapour release as two cooling mechanisms.",
+          "evidenceTimestamp": "00:55"
+        },
+        {
+          "id": "q4",
+          "prompt": "The cooling effect is stronger when trees are mature and planted _______.",
+          "answer": "continuously",
+          "type": "listening_sentence_completion",
+          "distractorNote": "A narrow line can help, but continuous planting strengthens the effect.",
+          "explanation": "The lecturer says the effect is stronger when trees are mature and planted continuously.",
+          "evidenceTimestamp": "01:06"
+        },
+        {
+          "id": "q5",
+          "prompt": "Soil and vegetation can reduce pressure on drainage systems during _______.",
+          "answer": "storms",
+          "type": "listening_sentence_completion",
+          "distractorNote": "Heavy rain is the cause; storms are the events when drainage pressure rises.",
+          "explanation": "Vegetation slows water and can reduce pressure during storms.",
+          "evidenceTimestamp": "01:26"
+        },
+        {
+          "id": "q6",
+          "prompt": "A nearby park may still be hard to use if it feels unsafe, poorly lit, or difficult to enter for people with _______ needs.",
+          "answer": "mobility",
+          "type": "listening_sentence_completion",
+          "distractorNote": "This question tests access as quality, not simple distance.",
+          "explanation": "The lecturer gives mobility needs as an example of why access is not only distance.",
+          "evidenceTimestamp": "01:55"
+        },
+        {
+          "id": "q7",
+          "prompt": "Green policy should prioritise neighbourhoods with high heat exposure, poor air quality, and limited _______ space.",
+          "answer": "recreational",
+          "type": "listening_sentence_completion",
+          "distractorNote": "The lecture's equity point lists three priority conditions.",
+          "explanation": "The final priority list includes limited recreational space.",
+          "evidenceTimestamp": "02:24"
         }
       ]
     }

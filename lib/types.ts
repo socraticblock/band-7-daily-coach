@@ -170,6 +170,7 @@ export type ListeningQuestion = {
   options?: string[];
   type: MissionTaskType;
   distractorNote?: string;
+  explanation?: string;
   evidenceTimestamp?: string; // e.g. "01:23"
 };
 

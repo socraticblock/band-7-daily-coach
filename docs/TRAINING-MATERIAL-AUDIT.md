@@ -20,11 +20,11 @@ Based on the current README and content structure:
 | Speaking prompts | 50 prompts | Prototype usable | Yes | No |
 | Vocabulary | 100 items | Warm-up usable | Yes | No |
 | Grammar drills | 30 drills | Warm-up usable | Yes | No |
-| Listening | 2 sets | Stub only; no real audio yet | Only as transcript practice | No |
+| Listening | 4 sets | Starter scripts ready for static MiniMax TTS audio generation | Yes, after MP3 generation | No |
 | Reading | 2 passages | Stub/basic practice | Yes, lightly | No |
 | Mini mocks | Not enough yet | Missing/insufficient | No | No |
 | Full mocks | Not present | Missing | No | No |
-| Real TTS audio | Not generated yet | Missing | No | No |
+| Real TTS audio | Offline MiniMax generation script added | Requires local key and generated MP3 commit | Soon | No |
 | Real STT | Code path added; requires API key | Not usable until key is set | Soon | Depends on testing |
 
 ## Official exam coverage requirement
@@ -48,6 +48,7 @@ V0.1 can be used for:
 4. Testing Speaking recording/transcript/feedback UX after API key is added.
 5. Testing whether mistakes saved into the Error Notebook actually create useful review behavior.
 6. Testing mobile usability.
+7. Testing first-pass Listening once static MP3 files have been generated.
 
 V0.1 should not be marketed as complete IELTS preparation.
 
@@ -57,9 +58,9 @@ Recommended language:
 
 ## What is missing before a student can seriously prepare mostly inside this app
 
-### 1. Listening audio
+### 1. Listening audio depth
 
-Listening cannot remain transcript-only.
+Listening cannot remain thin. The first four original scripts are in place for static MiniMax TTS generation, but V1 still needs breadth across all parts and question types.
 
 Minimum V1 target:
 
@@ -189,15 +190,15 @@ A student can start using the current build for:
 - Speaking prompt practice after API key is configured
 - active mistake review
 - light Reading practice
-- transcript-based Listening awareness
+- starter Listening practice after static MP3 files have been generated
 
 A student cannot yet use it as the only resource to pass IELTS at Band 7/C1 because:
 
-- Listening has no real audio yet
+- Listening has only 4 starter scripts and requires generated static audio files
 - Reading has only 2 passages
 - no full mocks are ready
 - content volume is too low
-- Reading/Listening mistakes are not yet saved into Error Notebook
+- Reading/Listening coverage is still shallow
 - real STT needs API key and testing
 
 ## Recommended next content sprint
@@ -225,9 +226,9 @@ A student can study for seven consecutive days without seeing duplicate material
 
 ## Priority order
 
-1. Add real audio to 4 listening exercises.
-2. Save wrong Reading/Listening answers to Error Notebook.
-3. Add 7-day starter pack.
+1. Generate and commit static audio for the 4 starter listening exercises.
+2. Add 7-day starter pack.
+3. Add more Reading/Listening depth.
 4. Add timers/autosave for Writing and Reading.
 5. Test real STT after API key is added.
 6. Add one mini mock.
