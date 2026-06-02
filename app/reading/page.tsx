@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
-import type { ContentItem, ReadingPayload, ReadingQuestion } from "@/lib/types";
-import { useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
+import type { ContentItem, MistakeCode, ReadingPayload, ReadingQuestion } from "@/lib/types";
+import { useMistakes, useProfile, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 
 export default function ReadingPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
@@ -14,6 +14,9 @@ export default function ReadingPage() {
   const [checked, setChecked] = useState(false);
   const [missionContentId, setMissionContentId] = useState<string | null>(null);
   const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [profile] = useProfile();
+  const [mistakes, setMistakes] = useMistakes();
   const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
@@ -54,6 +57,42 @@ export default function ReadingPage() {
           receptiveMastery: true,
         }),
       );
+      const wrongQuestions = payload.questions.filter((q) => normalize(answers[q.id]) !== normalize(q.answer));
+      if (wrongQuestions.length > 0) {
+        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const next = [...mistakes];
+        for (const q of wrongQuestions) {
+          const duplicate = next.some((card) =>
+            card.sourceSkill === "reading" &&
+            card.sourceContentId === selected.id &&
+            card.front === q.prompt &&
+            card.expectedAnswer === q.answer
+          );
+          if (duplicate) continue;
+          next.push({
+            id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            userId: profile.id,
+            sourceSkill: "reading",
+            sourceContentId: selected.id,
+            code: readingMistakeCode(q, answers[q.id] ?? ""),
+            front: q.prompt,
+            expectedAnswer: q.answer,
+            explanation: q.explanation,
+            createdAt: new Date().toISOString(),
+            reviewDueAt: tomorrow,
+            reviewStage: 0,
+            reviewCount: 0,
+            mastered: false,
+          });
+        }
+        const savedCount = next.length - mistakes.length;
+        setMistakes(next);
+        setSavedMessage(savedCount > 0
+          ? `Saved ${savedCount} reading mistake${savedCount === 1 ? "" : "s"} to Error Notebook.`
+          : "Reading mistakes were already saved to Error Notebook.");
+      } else {
+        setSavedMessage(null);
+      }
     }
     setChecked(true);
   };
@@ -72,6 +111,7 @@ export default function ReadingPage() {
                     setSelectedId(p.id);
                     setAnswers({});
                     setChecked(false);
+                    setSavedMessage(null);
                   }}
                   disabled={missionContentId !== null && p.id !== missionContentId}
                   className={`w-full rounded border px-3 py-2 text-left text-small transition-colors ${
@@ -178,6 +218,12 @@ export default function ReadingPage() {
                   </span>
                 )}
               </div>
+
+              {savedMessage && (
+                <div className="card border-success/40 bg-success/5 p-4 text-small text-success">
+                  {savedMessage}
+                </div>
+              )}
             </>
           )}
         </section>
@@ -188,4 +234,19 @@ export default function ReadingPage() {
 
 function normalize(s: string | undefined): string {
   return (s ?? "").trim().toLowerCase();
+}
+
+function readingMistakeCode(q: ReadingQuestion, userAnswer: string): MistakeCode {
+  const correct = normalize(q.answer);
+  const answer = normalize(userAnswer);
+  const explanation = q.explanation.toLowerCase();
+  if (q.type === "reading_true_false_not_given" && (correct === "not given" || answer === "not given")) return "R1";
+  if (explanation.includes("paraphrase") || explanation.includes("synonym")) return "R3";
+  if (
+    q.type === "reading_matching_headings" ||
+    q.type === "reading_matching_information" ||
+    q.type === "reading_matching_features"
+  ) return "R4";
+  if (explanation.includes("evidence") || explanation.includes("not stated")) return "R5";
+  return "R6";
 }
