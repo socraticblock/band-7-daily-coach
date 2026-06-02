@@ -1,0 +1,143 @@
+[
+  {
+    "id": "reading-passage-001",
+    "skill": "reading",
+    "type": "reading_true_false_not_given",
+    "title": "The rise of online learning",
+    "topicTags": ["education", "technology"],
+    "profileTags": ["general_academic", "education", "technology_ai", "scholarship_applications"],
+    "difficulty": "band6_5",
+    "estimatedMinutes": 8,
+    "cooldownDays": 30,
+    "reviewStatus": "approved",
+    "copyrightStatus": "original",
+    "payload": {
+      "passage": "Online learning has grown rapidly over the past decade, accelerated by the global pandemic that forced many institutions to move teaching online. Universities and private providers now offer thousands of courses that students can complete at their own pace. The flexibility of online study is often cited as its main advantage: learners can fit study around work, family and other commitments.\n\nHowever, the picture is not entirely positive. Researchers have found that completion rates for fully online courses are often lower than for in-person equivalents, particularly among learners who lack strong self-discipline. Without the social pressure of a classroom, it is easy to fall behind.\n\nThe technology itself has improved significantly. Modern platforms now include interactive exercises, video discussions, and tools for collaboration. Some universities have begun to offer hybrid models, combining the best of online flexibility with occasional in-person sessions. These hybrid courses tend to have higher completion rates than either purely online or purely classroom-based alternatives.\n\nA common concern is whether online learning can lead to the same depth of understanding as traditional methods. Proponents argue that the quality of the material and the design of the course matter far more than the medium itself.",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Online learning became more common because of the pandemic.",
+          "answer": "True",
+          "type": "reading_true_false_not_given",
+          "explanation": "The passage directly states that online learning was 'accelerated by the global pandemic'."
+        },
+        {
+          "id": "q2",
+          "prompt": "Students prefer online courses because they are cheaper than classroom courses.",
+          "answer": "Not Given",
+          "type": "reading_true_false_not_given",
+          "explanation": "The passage mentions flexibility as the main advantage, not cost. The cost comparison is not discussed."
+        },
+        {
+          "id": "q3",
+          "prompt": "Completion rates for online courses are often lower than for in-person courses.",
+          "answer": "True",
+          "type": "reading_true_false_not_given",
+          "explanation": "The passage states: 'completion rates for fully online courses are often lower than for in-person equivalents'."
+        },
+        {
+          "id": "q4",
+          "prompt": "Hybrid courses are less popular than purely online courses.",
+          "answer": "Not Given",
+          "type": "reading_true_false_not_given",
+          "explanation": "The passage says hybrid courses have higher completion rates, but does not say anything about their popularity."
+        },
+        {
+          "id": "q5",
+          "prompt": "The quality of the course is more important than whether it is online or in-person.",
+          "answer": "True",
+          "type": "reading_true_false_not_given",
+          "explanation": "The final paragraph states: 'the quality of the material and the design of the course matter far more than the medium itself'."
+        }
+      ]
+    }
+  },
+  {
+    "id": "reading-passage-002",
+    "skill": "reading",
+    "type": "reading_matching_headings",
+    "title": "The science of sleep",
+    "topicTags": ["health", "science"],
+    "profileTags": ["general_academic", "medicine_healthcare"],
+    "difficulty": "band7_0",
+    "estimatedMinutes": 10,
+    "cooldownDays": 30,
+    "reviewStatus": "approved",
+    "copyrightStatus": "original",
+    "payload": {
+      "passage": "A. Modern life is increasingly at odds with the natural sleep patterns of humans. Artificial light, shift work, and constant screen time have all contributed to a situation in which many adults sleep less than seven hours per night, below the recommended level for adults.\n\nB. Sleep is not a single state. The brain cycles through several distinct phases, each of which appears to play a different role in memory, mood, and physical recovery. The deepest phase, sometimes called slow-wave sleep, is associated with physical repair and certain types of memory consolidation.\n\nC. Chronic sleep deprivation has measurable effects on the body. Studies have linked it to higher risks of cardiovascular disease, obesity, and impaired immune function. The economic cost of sleep deprivation, in lost productivity and healthcare, has been estimated at hundreds of billions of dollars annually in some countries.\n\nD. Researchers have begun to identify the genetic and neurological basis of sleep needs. Some people appear to function well on six hours a night, while others need closer to nine. Understanding these differences may eventually allow more personalised advice on sleep.\n\nE. There is growing interest in workplace interventions. A small number of companies now provide nap rooms or limit after-hours emails to encourage healthier sleep habits. Critics argue that such measures do not address the underlying culture of overwork.",
+      "questions": [
+        {
+          "id": "h1",
+          "prompt": "Choose the best heading for paragraph A.",
+          "answer": "Why modern life reduces sleep",
+          "type": "reading_matching_headings",
+          "options": [
+            "Why modern life reduces sleep",
+            "The different phases of sleep",
+            "The economic cost of poor sleep",
+            "Genetic differences in sleep needs",
+            "Workplace responses to sleep deprivation"
+          ],
+          "explanation": "Paragraph A discusses artificial light, shift work, and screen time as reasons adults sleep less."
+        },
+        {
+          "id": "h2",
+          "prompt": "Choose the best heading for paragraph B.",
+          "answer": "The different phases of sleep",
+          "type": "reading_matching_headings",
+          "options": [
+            "Why modern life reduces sleep",
+            "The different phases of sleep",
+            "The economic cost of poor sleep",
+            "Genetic differences in sleep needs",
+            "Workplace responses to sleep deprivation"
+          ],
+          "explanation": "Paragraph B describes the cycles of sleep and the role of slow-wave sleep."
+        },
+        {
+          "id": "h3",
+          "prompt": "Choose the best heading for paragraph C.",
+          "answer": "The economic cost of poor sleep",
+          "type": "reading_matching_headings",
+          "options": [
+            "Why modern life reduces sleep",
+            "The different phases of sleep",
+            "The economic cost of poor sleep",
+            "Genetic differences in sleep needs",
+            "Workplace responses to sleep deprivation"
+          ],
+          "explanation": "Paragraph C links chronic sleep deprivation to disease and estimates its economic cost."
+        },
+        {
+          "id": "h4",
+          "prompt": "Choose the best heading for paragraph D.",
+          "answer": "Genetic differences in sleep needs",
+          "type": "reading_matching_headings",
+          "options": [
+            "Why modern life reduces sleep",
+            "The different phases of sleep",
+            "The economic cost of poor sleep",
+            "Genetic differences in sleep needs",
+            "Workplace responses to sleep deprivation"
+          ],
+          "explanation": "Paragraph D describes research on genetic and neurological differences in sleep needs."
+        },
+        {
+          "id": "h5",
+          "prompt": "Choose the best heading for paragraph E.",
+          "answer": "Workplace responses to sleep deprivation",
+          "type": "reading_matching_headings",
+          "options": [
+            "Why modern life reduces sleep",
+            "The different phases of sleep",
+            "The economic cost of poor sleep",
+            "Genetic differences in sleep needs",
+            "Workplace responses to sleep deprivation"
+          ],
+          "explanation": "Paragraph E describes companies providing nap rooms and limiting after-hours emails."
+        }
+      ]
+    }
+  }
+]

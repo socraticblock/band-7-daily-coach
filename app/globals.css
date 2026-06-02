@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper text-ink antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection {
+    @apply bg-accent/20;
+  }
+  /* Better focus rings — calm, not loud */
+  :focus-visible {
+    outline: 2px solid theme(colors.accent.DEFAULT);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-page px-5 sm:px-8;
+  }
+  .container-reading {
+    @apply mx-auto w-full max-w-reading px-5 sm:px-8;
+  }
+  .hairline {
+    @apply border-line border-t;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center rounded px-4 py-2.5 text-small font-medium transition-colors;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-paper hover:bg-ink/90;
+  }
+  .btn-accent {
+    @apply btn bg-accent text-paper hover:bg-accent-hover;
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-paper text-ink hover:bg-paper-warm;
+  }
+  .btn-sm {
+    @apply px-3 py-1.5 text-tiny;
+  }
+  .card {
+    @apply rounded border border-line bg-paper-card;
+  }
+  .label {
+    @apply text-tiny uppercase tracking-wider text-ink-subtle;
+  }
+  .muted {
+    @apply text-ink-muted;
+  }
+  .input {
+    @apply w-full rounded border border-line bg-paper-card px-3 py-2.5 text-body text-ink placeholder:text-ink-subtle focus:border-accent focus:outline-none;
+  }
+  .textarea {
+    @apply input min-h-[180px] resize-y leading-relaxed;
+  }
+  .pill {
+    @apply inline-flex items-center rounded-full border border-line bg-paper-warm px-2.5 py-0.5 text-tiny text-ink-muted;
+  }
+}
+
+/* Subtle entry — used sparingly on cards */
+.fade-in {
+  animation: fadeIn 240ms ease-out both;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

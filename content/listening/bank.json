@@ -1,0 +1,130 @@
+[
+  {
+    "id": "listening-part1-001",
+    "skill": "listening",
+    "type": "listening_form_completion",
+    "title": "Part 1: Enquiring about a language course",
+    "topicTags": ["education", "language"],
+    "profileTags": ["general_academic", "education", "scholarship_applications"],
+    "difficulty": "band6_0",
+    "estimatedMinutes": 7,
+    "cooldownDays": 30,
+    "reviewStatus": "approved",
+    "copyrightStatus": "original",
+    "payload": {
+      "transcript": "Receptionist: Good morning. Brighton Language Centre, how can I help?\nCaller: Hello, my name's Anna Sokolov. I'd like some information about your exam preparation courses, please.\nReceptionist: Of course. Could I take your name and a contact number?\nCaller: Yes — Anna Sokolov. My mobile is 07700 900 482.\nReceptionist: Thank you. Which exam are you preparing for?\nCaller: IELTS Academic. I need Band 7 for a master's programme.\nReceptionist: Right. We have a four-week intensive course starting on the 6th of July. Classes run Monday to Friday, 9.30 to 12.30.\nCaller: How much does it cost?\nReceptionist: The fee is 480 pounds, including all materials. We also have a mock test every Friday.\nCaller: That sounds good. Is there an enrolment deadline?\nReceptionist: Bookings close on the 28th of June.",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "Complete the form below. Write NO MORE THAN TWO WORDS AND/OR A NUMBER for each answer.\n\nName: Anna _______",
+          "answer": "Sokolov",
+          "type": "listening_form_completion",
+          "distractorNote": "Listen carefully for the spelling. The receptionist repeats the name.",
+          "evidenceTimestamp": "00:09"
+        },
+        {
+          "id": "q2",
+          "prompt": "Mobile number: _______",
+          "answer": "07700 900 482",
+          "type": "listening_form_completion",
+          "distractorNote": "Phone numbers must be transcribed exactly, including spaces.",
+          "evidenceTimestamp": "00:17"
+        },
+        {
+          "id": "q3",
+          "prompt": "Exam: IELTS _______",
+          "answer": "Academic",
+          "type": "listening_form_completion",
+          "distractorNote": "'Academic' distinguishes from 'General Training'.",
+          "evidenceTimestamp": "00:25"
+        },
+        {
+          "id": "q4",
+          "prompt": "Target band: _______",
+          "answer": "7",
+          "type": "listening_form_completion",
+          "distractorNote": "Write just the number.",
+          "evidenceTimestamp": "00:27"
+        },
+        {
+          "id": "q5",
+          "prompt": "Course start date: _______ July",
+          "answer": "6th",
+          "type": "listening_form_completion",
+          "distractorNote": "Ordinal numbers are common in Part 1 dates.",
+          "evidenceTimestamp": "00:36"
+        },
+        {
+          "id": "q6",
+          "prompt": "Course fee: £_______ (including materials)",
+          "answer": "480",
+          "type": "listening_form_completion",
+          "distractorNote": "Don't confuse the fee with the deadline date.",
+          "evidenceTimestamp": "00:48"
+        },
+        {
+          "id": "q7",
+          "prompt": "Booking deadline: _______ June",
+          "answer": "28th",
+          "type": "listening_form_completion",
+          "distractorNote": "Deadline is a different number from the start date.",
+          "evidenceTimestamp": "00:55"
+        }
+      ]
+    }
+  },
+  {
+    "id": "listening-part2-001",
+    "skill": "listening",
+    "type": "listening_multiple_choice",
+    "title": "Part 2: City library tour",
+    "topicTags": ["cities", "culture"],
+    "profileTags": ["general_academic"],
+    "difficulty": "band6_5",
+    "estimatedMinutes": 8,
+    "cooldownDays": 30,
+    "reviewStatus": "approved",
+    "copyrightStatus": "original",
+    "payload": {
+      "transcript": "Welcome to the Westgate City Library tour. My name is Helen, and I'll be guiding you this morning.\n\nThe library first opened in 1903, and the new extension was completed in 2015. As you can see, the original reading room has been kept exactly as it was, with the wooden panelling and brass lamps.\n\nThe tour will take about forty-five minutes. We'll start on the ground floor, where the reception desk and café are located. Please note that the café closes at 4 pm today, earlier than usual.\n\nIf you need to leave the group at any point, the reference desk on the first floor has maps of the building and information about upcoming events.\n\nThe library hosts a weekly reading group on Thursday evenings, and a monthly book sale on the first Saturday of each month. Members receive a ten percent discount on book-sale purchases.\n\nPhotography is allowed in the public areas only, and not in the rare-books section on the second floor. Thank you for your cooperation.\n\nThe tour ends in the courtyard garden, where you are welcome to stay. The garden is open until 6 pm.",
+      "questions": [
+        {
+          "id": "q1",
+          "prompt": "What year was the original library building completed?",
+          "answer": "1903",
+          "type": "listening_multiple_choice",
+          "options": ["1887", "1903", "1915", "2015"],
+          "distractorNote": "There are two years mentioned. The original building is the earlier one.",
+          "evidenceTimestamp": "00:18"
+        },
+        {
+          "id": "q2",
+          "prompt": "What time does the café close today?",
+          "answer": "4 pm",
+          "type": "listening_multiple_choice",
+          "options": ["3 pm", "4 pm", "5 pm", "6 pm"],
+          "distractorNote": "The tour guide says 'earlier than usual'. The garden closes later than the café.",
+          "evidenceTimestamp": "00:42"
+        },
+        {
+          "id": "q3",
+          "prompt": "What benefit do library members receive?",
+          "answer": "10% discount on book sales",
+          "type": "listening_multiple_choice",
+          "options": ["Free coffee at the café", "Free entry to events", "10% discount on book sales", "Extended borrowing limits"],
+          "distractorNote": "Don't assume benefits not stated in the recording.",
+          "evidenceTimestamp": "01:15"
+        },
+        {
+          "id": "q4",
+          "prompt": "Where is photography NOT allowed?",
+          "answer": "the rare-books section on the second floor",
+          "type": "listening_multiple_choice",
+          "options": ["the courtyard garden", "the public reading areas", "the café", "the rare-books section on the second floor"],
+          "distractorNote": "Listen for the negative. 'Public areas only' is the rule.",
+          "evidenceTimestamp": "01:30"
+        }
+      ]
+    }
+  }
+]
