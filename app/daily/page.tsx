@@ -74,7 +74,7 @@ export default function DailyPage() {
 
   const completeTask = (task: MissionTask) => {
     if (!mission) return;
-    if (requiresPracticeEvidence(task) && !wasAttemptedOnDate(userContentState, task.sourceContentId, today)) {
+    if (requiresPracticeEvidence(task) && !wasAttemptedToday(userContentState, task.sourceContentId, today)) {
       setCompletionNote("Open and complete this assigned practice item before marking it complete.");
       return;
     }
@@ -97,7 +97,7 @@ export default function DailyPage() {
     };
     updated.status = evaluateMissionStatus(updated.tasks);
     setMission(updated);
-    if (task.skill !== "review" && !requiresPracticeEvidence(task) && !wasAttemptedOnDate(userContentState, task.sourceContentId, today)) {
+    if (task.skill !== "review" && !requiresPracticeEvidence(task) && !wasAttemptedToday(userContentState, task.sourceContentId, today)) {
       setUserContentState((current) =>
         markContentAttempted(current, task.sourceContentId, { attemptedAt: now.toISOString() }),
       );
@@ -187,6 +187,7 @@ export default function DailyPage() {
           {mission.tasks.map((t, i) => {
             const content = getContentById(t.sourceContentId);
             const taskHref = routeForTask(t);
+            const canMarkComplete = !requiresPracticeEvidence(t) || wasAttemptedToday(userContentState, t.sourceContentId, today);
             return (
               <li key={t.id} className="card p-5">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -219,7 +220,12 @@ export default function DailyPage() {
                           Open
                         </Link>
                       )}
-                      <button onClick={() => completeTask(t)} className="btn-ghost btn-sm">
+                      <button
+                        onClick={() => completeTask(t)}
+                        disabled={!canMarkComplete}
+                        title={canMarkComplete ? undefined : "Complete this item on its skill page first."}
+                        className={`btn-ghost btn-sm ${canMarkComplete ? "" : "cursor-not-allowed opacity-50"}`}
+                      >
                         Mark complete
                       </button>
                       <button onClick={() => skipTask(t)} className="btn-ghost btn-sm text-warn">
@@ -305,13 +311,13 @@ function requiresPracticeEvidence(task: MissionTask): boolean {
   return task.skill === "writing" || task.skill === "speaking" || task.skill === "reading" || task.skill === "listening";
 }
 
-function wasAttemptedOnDate(
+function wasAttemptedToday(
   states: ReturnType<typeof useUserContentState>[0],
   contentId: string,
-  date: string,
+  today: string,
 ): boolean {
   const state = states.find((s) => s.contentId === contentId);
-  return state?.lastAttemptedAt?.slice(0, 10) === date;
+  return state?.lastAttemptedAt?.slice(0, 10) === today;
 }
 
 function routeForTask(t: MissionTask): string | null {
