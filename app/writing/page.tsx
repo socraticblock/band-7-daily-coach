@@ -72,7 +72,15 @@ export default function WritingPage() {
       // Convert top mistakes to error notebook
       setMistakes((cards) => {
         const next = [...cards];
-        for (const m of data.savedMistakes) {
+        const seenExcerpts = new Set<string>();
+        const usableMistakes = data.savedMistakes.filter((m) => {
+          const excerptKey = m.excerpt.trim().toLowerCase();
+          if (!excerptKey || !m.improvedExcerpt?.trim()) return false;
+          if (seenExcerpts.has(excerptKey)) return false;
+          seenExcerpts.add(excerptKey);
+          return true;
+        });
+        for (const m of usableMistakes) {
           next.push({
             id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
             userId: profile.id,
@@ -80,10 +88,10 @@ export default function WritingPage() {
             sourceContentId: selected.id,
             code: m.code as MistakeCode,
             front: m.excerpt,
-            expectedAnswer: data.beforeAfter[0]?.after ?? m.excerpt,
+            expectedAnswer: m.improvedExcerpt,
             explanation: m.note,
             originalExcerpt: m.excerpt,
-            improvedExcerpt: data.beforeAfter[0]?.after,
+            improvedExcerpt: m.improvedExcerpt,
             createdAt: new Date().toISOString(),
             reviewDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
             reviewStage: 0,
@@ -272,10 +280,13 @@ function WritingFeedbackView({ fb }: { fb: WritingFeedback }) {
         ) : (
           <ul className="mt-2 space-y-2 text-small">
             {fb.savedMistakes.map((m, i) => (
-              <li key={i} className="flex gap-3">
+              <li key={i} className="grid gap-1 sm:grid-cols-[auto_1fr] sm:gap-x-3">
                 <span className="pill shrink-0">{m.code}</span>
                 <span className="text-ink-muted">{m.excerpt}</span>
-                <span className="ml-auto text-tiny text-ink-subtle">{m.note}</span>
+                <span className="hidden sm:block" />
+                <span>{m.improvedExcerpt}</span>
+                <span className="hidden sm:block" />
+                <span className="text-tiny text-ink-subtle">{m.note}</span>
               </li>
             ))}
           </ul>

@@ -15,6 +15,8 @@ You MUST:
 - Save at most 2-3 mistakes per submission. Choose the highest-leverage ones.
 - Provide exactly one before/after rewrite that is the single highest-leverage change.
 - Quote the original sentence verbatim and the improved sentence verbatim.
+- For each saved mistake, include an excerpt copied verbatim from the student response and an improvedExcerpt that directly improves that exact excerpt.
+- Do not save two mistakes with the same excerpt.
 - Use the four official IELTS Writing criteria: Task Achievement/Task Response, Coherence and Cohesion, Lexical Resource, Grammatical Range and Accuracy.
 - Practice band is a range like ["band6_0", "band6_5"], not a single value.
 
@@ -57,13 +59,15 @@ Return JSON of shape:
     { "before": "<verbatim original>", "after": "<verbatim improved>", "why": "..." }
   ],
   "savedMistakes": [
-    { "code": "W1", "excerpt": "<verbatim original>", "note": "..." }
+    { "code": "W1", "excerpt": "<verbatim original>", "improvedExcerpt": "<direct improvement of that excerpt>", "note": "..." }
   ],
   "nextDrill": { "type": "writing_micro_thesis", "prompt": "..." }
 }
 
 Allowed mistake codes for writing: W1, W2, W3, W4, W5, W6, W7, W8, W9, W10.
-Pick the highest-leverage 2-3. Do not exceed 3.`;
+Pick the highest-leverage 1-3. Do not exceed 3.
+Each savedMistakes excerpt must be a unique verbatim span from the student response.
+Each improvedExcerpt must improve only its paired excerpt. If you cannot provide a direct improvedExcerpt, omit that saved mistake.`;
 
 export const SPEAKING_FEEDBACK_SYSTEM = `You are an IELTS speaking coach. You give rubric-anchored, concrete feedback based on a transcript.
 

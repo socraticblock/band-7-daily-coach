@@ -313,7 +313,7 @@ export type WritingFeedback = {
   };
   topFixes: string[];
   beforeAfter: { before: string; after: string; why: string }[];
-  savedMistakes: { code: MistakeCode; excerpt: string; note: string }[];
+  savedMistakes: { code: MistakeCode; excerpt: string; improvedExcerpt: string; note: string }[];
   nextDrill: { type: MissionTaskType; prompt: string };
 };
 

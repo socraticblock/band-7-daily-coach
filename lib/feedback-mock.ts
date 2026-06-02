@@ -37,6 +37,11 @@ export function mockWritingFeedback(input: WritingMockInput): WritingFeedback {
   if (codes.length === 0) codes.push("W1");
 
   const firstSentence = input.text.split(/[.!?]/)[0]?.trim() || "The topic is important.";
+  const sentences = input.text
+    .split(/[.!?]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const excerpts = Array.from(new Set([firstSentence, ...sentences])).slice(0, 3);
   return {
     practiceBandRange: ["band6_0", "band6_5"],
     criteria: {
@@ -57,9 +62,10 @@ export function mockWritingFeedback(input: WritingMockInput): WritingFeedback {
         why: "A direct thesis gives the reader a clear position and a reason to keep reading.",
       },
     ],
-    savedMistakes: codes.slice(0, 3).map((c) => ({
+    savedMistakes: codes.slice(0, 3).map((c, i) => ({
       code: c,
-      excerpt: firstSentence,
+      excerpt: excerpts[i] ?? firstSentence,
+      improvedExcerpt: improveWritingExcerpt(excerpts[i] ?? firstSentence),
       note: MISTAKE_NOTE[c],
     })),
     nextDrill: {
@@ -67,6 +73,18 @@ export function mockWritingFeedback(input: WritingMockInput): WritingFeedback {
       prompt: "Rewrite this thesis to be clearer and more specific.\n\nOriginal: 'Modern life has changed because of new technology.'",
     },
   };
+}
+
+function improveWritingExcerpt(excerpt: string): string {
+  const improved = excerpt
+    .replace(/\bvery important\b/gi, "central")
+    .replace(/\bgood\b/gi, "effective")
+    .replace(/\bbad\b/gi, "harmful")
+    .replace(/\bmany students use laptop and phone\b/gi, "many students rely on laptops and phones")
+    .replace(/\bcan not\b/gi, "cannot");
+  return improved === excerpt
+    ? `This point should be stated with a clearer claim and one precise reason.`
+    : improved;
 }
 
 export function mockSpeakingFeedback(input: SpeakingMockInput): SpeakingFeedback {
