@@ -157,9 +157,26 @@ export type UserContentState = {
 // Skill-specific payloads
 // ----------------------------------------------------------------------------
 
+export type ListeningTurn = {
+  /** Display label shown in the visible transcript (e.g. "Receptionist", "Tutor"). May be empty for monologues. */
+  speaker: string;
+  /** MiniMax voice_id used for the spoken audio of this turn. The visible label is never sent to TTS. */
+  voiceId?: string;
+  /** The text the speaker says, without the label and without stage directions. */
+  text: string;
+};
+
 export type ListeningPayload = {
   audioUrl?: string; // empty for stub; TTS-generated later
+  /** Human-readable transcript with speaker labels. Rendered in the UI for review only. */
   transcript: string;
+  /**
+   * Optional structured turns. When present, the build script generates one MP3
+   * per turn (using each turn's voiceId) and concatenates them with short pauses.
+   * When absent, the build script falls back to single-voice synthesis of the
+   * whole transcript (legacy / stub behaviour).
+   */
+  turns?: ListeningTurn[];
   questions: ListeningQuestion[];
 };
 

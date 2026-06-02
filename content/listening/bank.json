@@ -95,7 +95,104 @@
           "evidenceTimestamp": "01:31"
         }
       ],
-      "audioUrl": "/audio/listening/listening-part1-001.mp3"
+      "audioUrl": "/audio/listening/listening-part1-001.mp3",
+      "turns": [
+        {
+          "speaker": "Receptionist",
+          "text": "Good afternoon, Northbridge Language Centre. How can I help?",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "Hello. I am calling about your exam preparation courses. My name is Lena Markovic.",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "Certainly. Could you spell your surname for me?",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "Yes, it is M-A-R-K-O-V-I-C.",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "Thank you. Are you preparing for IELTS Academic or General Training?",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "Academic. I need Band 7 for a postgraduate programme in September.",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "We have a short intensive course and an evening course. The intensive one starts on Monday the 14th of July, but it is almost full.",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "I work in the mornings, so evening classes would be better.",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "In that case, the evening course starts on the 21st of July. Classes are on Tuesdays and Thursdays from 6:15 to 8:45.",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "And how many students are in a class?",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "Usually twelve, but we limit IELTS groups to ten.",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "Good. What is the fee?",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "It is 315 pounds for six weeks. That includes printed materials, but the mock test is extra.",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "How much is the mock test?",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "Thirty-five pounds if you book it with the course. Otherwise it is fifty.",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "I will book it with the course, then.",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "Fine. I need an email address.",
+          "voiceId": "English_Graceful_Lady"
+        },
+        {
+          "speaker": "Student",
+          "text": "It is lena dot markovic at mailpoint dot com.",
+          "voiceId": "English_SereneWoman"
+        },
+        {
+          "speaker": "Receptionist",
+          "text": "Thank you. Finally, the booking deadline is the 9th of July, and we ask for a 50 pound deposit.",
+          "voiceId": "English_Graceful_Lady"
+        }
+      ]
     }
   },
   {
@@ -193,7 +290,14 @@
           "evidenceTimestamp": "01:38"
         }
       ],
-      "audioUrl": "/audio/listening/listening-part2-001.mp3"
+      "audioUrl": "/audio/listening/listening-part2-001.mp3",
+      "turns": [
+        {
+          "speaker": "Helen",
+          "text": "Welcome to the Westgate City Library orientation. I am Helen, the visitor services coordinator, and I will explain the main facilities before you explore the building.\n\nThe library opens at nine o'clock from Monday to Saturday. On Wednesdays it stays open until eight in the evening, mainly for students and shift workers. On Sundays only the ground-floor reading room is open, and it closes at two.\n\nWhen you enter, the information desk is on your left. New members should collect a card there before using the self-service machines. The cafe is opposite the desk. Please note that hot food is not allowed beyond the cafe area, although covered drinks may be taken into most study spaces.\n\nThe children's library is downstairs next to the lift. The local history room is on the first floor, beside the quiet study area. If you want newspapers from earlier than 1990, ask at the reference desk because those are stored on microfilm.\n\nThe computer room is popular, so each session is limited to one hour when other people are waiting. Printing is available there, but scanning is free only for library members.\n\nWe run two regular events. The reading circle meets every Thursday at 6:30, while the digital skills workshop is held on the first Saturday of each month. You need to book the workshop online because places are limited.\n\nFinally, photography is allowed in the entrance hall and cafe, but not in the quiet study area or the children's library. Please silence your phone before you go upstairs.",
+          "voiceId": "English_compelling_lady1"
+        }
+      ]
     }
   },
   {
@@ -319,7 +423,94 @@
           "evidenceTimestamp": "02:03"
         }
       ],
-      "audioUrl": "/audio/listening/listening-part3-001.mp3"
+      "audioUrl": "/audio/listening/listening-part3-001.mp3",
+      "turns": [
+        {
+          "speaker": "Tutor",
+          "text": "So, Maya and Daniel, tell me how your seminar project is developing.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Maya",
+          "text": "We first wanted to compare online lectures with face-to-face lectures, but the topic felt too broad. Now we are focusing on how students use short revision videos before exams.",
+          "voiceId": "English_radiant_girl"
+        },
+        {
+          "speaker": "Daniel",
+          "text": "We also planned to survey the whole first-year group, but only forty students replied to our pilot questionnaire.",
+          "voiceId": "English_FriendlyPerson"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "Forty is acceptable for a small seminar project, but you need to be careful about your claims. What exactly will you measure?",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Maya",
+          "text": "We thought about asking whether videos improve grades.",
+          "voiceId": "English_radiant_girl"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "That would be difficult unless you have access to reliable grade data and a control group.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Daniel",
+          "text": "So perhaps we should ask how students decide which videos to trust.",
+          "voiceId": "English_FriendlyPerson"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "That is more manageable. You could examine criteria such as the teacher's expertise, the length of the video, and whether examples are included.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Maya",
+          "text": "I like that. Daniel wanted to include production quality too, but I am not sure it matters academically.",
+          "voiceId": "English_radiant_girl"
+        },
+        {
+          "speaker": "Daniel",
+          "text": "I do not mean fancy editing. I mean clear sound and readable slides. In the pilot comments, several students said they stopped watching when the audio was poor.",
+          "voiceId": "English_FriendlyPerson"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "Then production quality is relevant, but define it narrowly. Do not turn the project into a media studies assignment.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Maya",
+          "text": "For the presentation, should we start with our survey results?",
+          "voiceId": "English_radiant_girl"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "Start with the problem. Explain why students rely on revision videos, then show your research question, method, and findings.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Daniel",
+          "text": "And the literature review?",
+          "voiceId": "English_FriendlyPerson"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "Keep it brief. Choose three sources only, and use them to frame your categories. Your biggest weakness at the moment is that your categories overlap. For example, a video can be short and also well explained.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        },
+        {
+          "speaker": "Maya",
+          "text": "So we need clearer coding rules before analysing the responses.",
+          "voiceId": "English_radiant_girl"
+        },
+        {
+          "speaker": "Tutor",
+          "text": "Exactly. Bring me one sample coded response next week, not a full draft.",
+          "voiceId": "English_Deep-VoicedGentleman"
+        }
+      ]
     }
   },
   {
@@ -409,7 +600,14 @@
           "evidenceTimestamp": "02:24"
         }
       ],
-      "audioUrl": "/audio/listening/listening-part4-001.mp3"
+      "audioUrl": "/audio/listening/listening-part4-001.mp3",
+      "turns": [
+        {
+          "speaker": "Lecturer",
+          "text": "Today we are looking at urban green spaces, not simply as attractive features of a city, but as working infrastructure. By green spaces, I mean parks, street trees, community gardens, planted roofs, and small areas of vegetation beside roads or public buildings.\n\nHistorically, city parks were often designed for leisure and display. They gave residents somewhere pleasant to walk, but they were not usually measured in terms of public health or climate performance. That has changed. Planners now ask what a green space does, who can reach it, and whether it is maintained over time.\n\nOne benefit is temperature control. In summer, concrete and asphalt absorb heat during the day and release it slowly at night. Trees reduce this effect by providing shade and by releasing water vapour through their leaves. Even a narrow line of street trees can lower temperatures on a pavement, although the effect is stronger when trees are mature and planted continuously.\n\nA second benefit concerns water. Heavy rain can overwhelm drainage systems, especially in older cities. Soil and vegetation slow the movement of water and allow some of it to soak into the ground. This does not remove the need for engineered drains, but it can reduce pressure on them during storms.\n\nThere are also social and psychological benefits. Studies often link access to green space with lower stress and more physical activity. However, access is not only about distance. A park may be close on a map but feel unsafe, poorly lit, or difficult to enter for people with mobility needs. Quality and design therefore matter as much as the number of square metres.\n\nFinally, we should consider equity. Wealthier districts often have more tree cover and better-maintained parks. If cities invest only in already attractive areas, green infrastructure may increase inequality. Effective policy should prioritise neighbourhoods with high heat exposure, poor air quality, and limited recreational space.\n\nIn short, urban green spaces are not decorative extras. They are part of a city's health, climate, and social systems, but they only work well when location, maintenance, and fair access are planned together.",
+          "voiceId": "English_expressive_narrator"
+        }
+      ]
     }
   }
 ]
