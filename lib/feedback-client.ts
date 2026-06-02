@@ -1,7 +1,7 @@
 // ============================================================================
-// CLIENT-SIDE FEEDBACK — used by pages in static-export demo mode.
-// Tries the real API route first; falls back to a structured mock so the
-// full UX is testable without a backend.
+// CLIENT-SIDE FEEDBACK
+// Calls the real API routes. In explicit demo mode only, falls back to structured
+// mocks so the UX can be tested without a backend/API key.
 // ============================================================================
 
 "use client";
@@ -9,12 +9,19 @@
 import type { WritingFeedback, SpeakingFeedback } from "./types";
 import { mockWritingFeedback, mockSpeakingFeedback, mockTranscribe, type WritingMockInput, type SpeakingMockInput } from "./feedback-mock";
 
+const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
 async function safeJson<T>(res: Response): Promise<T> {
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Request failed (${res.status}): ${text.slice(0, 120)}`);
   }
   return (await res.json()) as T;
+}
+
+function demoFallback<T>(fallback: () => T, originalError: unknown): T {
+  if (DEMO_MODE) return fallback();
+  throw originalError instanceof Error ? originalError : new Error("Request failed.");
 }
 
 export async function requestWritingFeedback(input: WritingMockInput): Promise<WritingFeedback> {
@@ -25,9 +32,8 @@ export async function requestWritingFeedback(input: WritingMockInput): Promise<W
       body: JSON.stringify(input),
     });
     return await safeJson<WritingFeedback>(res);
-  } catch {
-    // Static export: no API route. Use the structured mock.
-    return mockWritingFeedback(input);
+  } catch (err) {
+    return demoFallback(() => mockWritingFeedback(input), err);
   }
 }
 
@@ -39,8 +45,8 @@ export async function requestSpeakingFeedback(input: SpeakingMockInput): Promise
       body: JSON.stringify(input),
     });
     return await safeJson<SpeakingFeedback>(res);
-  } catch {
-    return mockSpeakingFeedback(input);
+  } catch (err) {
+    return demoFallback(() => mockSpeakingFeedback(input), err);
   }
 }
 
@@ -50,7 +56,7 @@ export async function requestTranscription(audio: Blob): Promise<{ transcript: s
     fd.append("audio", audio, "recording.webm");
     const res = await fetch("/api/speech/transcribe", { method: "POST", body: fd });
     return await safeJson<{ transcript: string; confidence: "high" | "medium" | "low" }>(res);
-  } catch {
-    return mockTranscribe();
+  } catch (err) {
+    return demoFallback(() => mockTranscribe(), err);
   }
 }
