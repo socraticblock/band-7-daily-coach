@@ -4,8 +4,16 @@
     "skill": "listening",
     "type": "listening_form_completion",
     "title": "Part 1: Exam preparation course enquiry",
-    "topicTags": ["education", "language", "exam-preparation"],
-    "profileTags": ["general_academic", "education", "scholarship_applications"],
+    "topicTags": [
+      "education",
+      "language",
+      "exam-preparation"
+    ],
+    "profileTags": [
+      "general_academic",
+      "education",
+      "scholarship_applications"
+    ],
     "difficulty": "band6_0",
     "estimatedMinutes": 8,
     "cooldownDays": 30,
@@ -86,7 +94,8 @@
           "explanation": "At the end, the receptionist gives the booking deadline as the 9th of July.",
           "evidenceTimestamp": "01:31"
         }
-      ]
+      ],
+      "audioUrl": "/audio/listening/listening-part1-001.mp3"
     }
   },
   {
@@ -94,8 +103,15 @@
     "skill": "listening",
     "type": "listening_note_completion",
     "title": "Part 2: City library orientation",
-    "topicTags": ["cities", "library", "community"],
-    "profileTags": ["general_academic", "education"],
+    "topicTags": [
+      "cities",
+      "library",
+      "community"
+    ],
+    "profileTags": [
+      "general_academic",
+      "education"
+    ],
     "difficulty": "band6_5",
     "estimatedMinutes": 8,
     "cooldownDays": 30,
@@ -176,7 +192,8 @@
           "explanation": "The restricted areas are the quiet study area and the children's library.",
           "evidenceTimestamp": "01:38"
         }
-      ]
+      ],
+      "audioUrl": "/audio/listening/listening-part2-001.mp3"
     }
   },
   {
@@ -184,8 +201,16 @@
     "skill": "listening",
     "type": "listening_multiple_choice",
     "title": "Part 3: Seminar research project planning",
-    "topicTags": ["research", "education", "presentation"],
-    "profileTags": ["general_academic", "education", "technology_ai"],
+    "topicTags": [
+      "research",
+      "education",
+      "presentation"
+    ],
+    "profileTags": [
+      "general_academic",
+      "education",
+      "technology_ai"
+    ],
     "difficulty": "band7_0",
     "estimatedMinutes": 10,
     "cooldownDays": 30,
@@ -199,7 +224,12 @@
           "prompt": "Why did the students change their original project topic?",
           "answer": "It was too broad.",
           "type": "listening_multiple_choice",
-          "options": ["It was too broad.", "It required too many interviews.", "The tutor had already rejected it.", "They could not access online lectures."],
+          "options": [
+            "It was too broad.",
+            "It required too many interviews.",
+            "The tutor had already rejected it.",
+            "They could not access online lectures."
+          ],
           "distractorNote": "The low survey response is a separate issue, not the reason for changing the topic.",
           "explanation": "Maya says the first idea, comparing online and face-to-face lectures, felt too broad.",
           "evidenceTimestamp": "00:07"
@@ -209,7 +239,12 @@
           "prompt": "What does the tutor say about using forty survey responses?",
           "answer": "It can work if the claims are limited.",
           "type": "listening_multiple_choice",
-          "options": ["It is too few to use.", "It can work if the claims are limited.", "It should be replaced by interviews.", "It proves the pilot questionnaire failed."],
+          "options": [
+            "It is too few to use.",
+            "It can work if the claims are limited.",
+            "It should be replaced by interviews.",
+            "It proves the pilot questionnaire failed."
+          ],
           "distractorNote": "The tutor says forty is acceptable, but warns them not to overclaim.",
           "explanation": "The tutor calls forty acceptable for a small project, provided the claims are careful.",
           "evidenceTimestamp": "00:24"
@@ -219,7 +254,12 @@
           "prompt": "The tutor prefers the revised research question because it is",
           "answer": "more practical to investigate.",
           "type": "listening_multiple_choice",
-          "options": ["more original than the first idea.", "more practical to investigate.", "more closely linked to grades.", "more suitable for experiments."],
+          "options": [
+            "more original than the first idea.",
+            "more practical to investigate.",
+            "more closely linked to grades.",
+            "more suitable for experiments."
+          ],
           "distractorNote": "The tutor rejects the grade-improvement idea because it would need grade data and a control group.",
           "explanation": "The tutor says asking how students decide which videos to trust is more manageable.",
           "evidenceTimestamp": "00:44"
@@ -229,7 +269,12 @@
           "prompt": "Daniel argues that production quality matters mainly because",
           "answer": "poor audio can make students stop watching.",
           "type": "listening_multiple_choice",
-          "options": ["students enjoy professional editing.", "poor audio can make students stop watching.", "it is the main topic of their seminar.", "it is easier to measure than expertise."],
+          "options": [
+            "students enjoy professional editing.",
+            "poor audio can make students stop watching.",
+            "it is the main topic of their seminar.",
+            "it is easier to measure than expertise."
+          ],
           "distractorNote": "Daniel rejects the idea that he means fancy editing.",
           "explanation": "Daniel explains that he means clear sound and readable slides, and poor audio affected viewers in pilot comments.",
           "evidenceTimestamp": "01:05"
@@ -239,7 +284,12 @@
           "prompt": "What should the students do at the start of their presentation?",
           "answer": "Explain the problem behind the research.",
           "type": "listening_multiple_choice",
-          "options": ["Present all survey results.", "Summarise the literature review.", "Explain the problem behind the research.", "Compare their individual opinions."],
+          "options": [
+            "Present all survey results.",
+            "Summarise the literature review.",
+            "Explain the problem behind the research.",
+            "Compare their individual opinions."
+          ],
           "distractorNote": "Maya suggests starting with survey results, but the tutor redirects them.",
           "explanation": "The tutor tells them to start with the problem before the research question, method, and findings.",
           "evidenceTimestamp": "01:26"
@@ -249,7 +299,12 @@
           "prompt": "What is the tutor most concerned about in their current analysis?",
           "answer": "Their categories are not clearly separated.",
           "type": "listening_multiple_choice",
-          "options": ["Their literature review is too short.", "Their categories are not clearly separated.", "Their sample is too specialised.", "Their presentation has no findings."],
+          "options": [
+            "Their literature review is too short.",
+            "Their categories are not clearly separated.",
+            "Their sample is too specialised.",
+            "Their presentation has no findings."
+          ],
           "distractorNote": "The tutor says to keep the literature review brief; the biggest weakness is overlapping categories.",
           "explanation": "The tutor explicitly says their biggest weakness is that the categories overlap.",
           "evidenceTimestamp": "01:45"
@@ -263,7 +318,8 @@
           "explanation": "The next step is one sample coded response, which will test whether their coding rules are clear.",
           "evidenceTimestamp": "02:03"
         }
-      ]
+      ],
+      "audioUrl": "/audio/listening/listening-part3-001.mp3"
     }
   },
   {
@@ -271,8 +327,16 @@
     "skill": "listening",
     "type": "listening_sentence_completion",
     "title": "Part 4: Lecture on urban green spaces",
-    "topicTags": ["environment", "cities", "public-health"],
-    "profileTags": ["general_academic", "environment_sustainability", "medicine_healthcare"],
+    "topicTags": [
+      "environment",
+      "cities",
+      "public-health"
+    ],
+    "profileTags": [
+      "general_academic",
+      "environment_sustainability",
+      "medicine_healthcare"
+    ],
     "difficulty": "band7_0",
     "estimatedMinutes": 10,
     "cooldownDays": 30,
@@ -344,7 +408,8 @@
           "explanation": "The final priority list includes limited recreational space.",
           "evidenceTimestamp": "02:24"
         }
-      ]
+      ],
+      "audioUrl": "/audio/listening/listening-part4-001.mp3"
     }
   }
 ]
