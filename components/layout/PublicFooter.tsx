@@ -24,6 +24,7 @@ export function PublicFooter() {
             <div className="label mb-3">Legal</div>
             <ul className="space-y-2 text-small">
               <li><Link href="/legal" className="hover:text-ink">Disclaimer</Link></li>
+              <li><Link href="/privacy" className="hover:text-ink">Privacy</Link></li>
             </ul>
           </div>
         </div>

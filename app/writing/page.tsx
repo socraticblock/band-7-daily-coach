@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
+import { AiDisclosureNotice } from "@/components/ui/AiDisclosureNotice";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, WritingPayload, WritingFeedback, MistakeCode } from "@/lib/types";
-import { useProfile, useMistakes, useWritingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
+import { useAiDisclosureAccepted, useProfile, useMistakes, useWritingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 import { BAND_NUMERIC } from "@/lib/types";
 import { requestWritingFeedback } from "@/lib/feedback-client";
 
@@ -23,6 +24,7 @@ export default function WritingPage() {
   const [, setMistakes] = useMistakes();
   const [, setHistory] = useWritingFeedback();
   const [, setUserContentState] = useUserContentState();
+  const [aiDisclosureAccepted, setAiDisclosureAccepted] = useAiDisclosureAccepted();
 
   useEffect(() => {
     const all = contentForSkill("writing");
@@ -51,7 +53,7 @@ export default function WritingPage() {
   }, [selectedId, setUserContentState]);
 
   const submit = async () => {
-    if (!selected || !payload) return;
+    if (!selected || !payload || !aiDisclosureAccepted) return;
     setLoading(true);
     setError(null);
     setFeedback(null);
@@ -194,7 +196,7 @@ export default function WritingPage() {
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <button onClick={submit} disabled={loading || text.trim().length < 5} className="btn-accent">
+                <button onClick={submit} disabled={loading || text.trim().length < 5 || !aiDisclosureAccepted} className="btn-accent">
                   {loading ? "Generating feedback…" : "Submit for feedback"}
                 </button>
                 {payload.minimumWords && wordCount < payload.minimumWords && (
@@ -203,6 +205,11 @@ export default function WritingPage() {
                   </span>
                 )}
               </div>
+
+              <AiDisclosureNotice
+                accepted={aiDisclosureAccepted}
+                onAccept={() => setAiDisclosureAccepted(true)}
+              />
 
               {error && (
                 <div className="card border-error/40 bg-error/5 p-4 text-small text-error">

@@ -1,5 +1,6 @@
 import { PublicNav } from "@/components/layout/PublicNav";
 import { PublicFooter } from "@/components/layout/PublicFooter";
+import Link from "next/link";
 
 export const metadata = { title: "Disclaimer — Band 7 Daily Coach" };
 
@@ -32,6 +33,10 @@ export default function LegalPage() {
               Practice band estimates shown in the app are estimates only. They are not
               official IELTS scores and should not be presented as such to any
               institution.
+            </p>
+            <p>
+              For prototype data and AI provider disclosure, read the{" "}
+              <Link href="/privacy" className="text-accent hover:underline">Privacy page</Link>.
             </p>
           </div>
         </div>

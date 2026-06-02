@@ -25,6 +25,7 @@ const MISTAKES_KEY = "b7dc.mistakes";
 const STATS_KEY = "b7dc.stats";
 const WRITING_FEEDBACK_KEY = "b7dc.writingFeedback";
 const SPEAKING_FEEDBACK_KEY = "b7dc.speakingFeedback";
+const AI_DISCLOSURE_KEY = "b7dc.aiDisclosureAccepted";
 
 const DEFAULT_PROFILE: UserProfile = {
   id: "local-user",
@@ -65,6 +66,10 @@ export function useWritingFeedback() {
 
 export function useSpeakingFeedback() {
   return useLocalStorage<SpeakingFeedback[]>(SPEAKING_FEEDBACK_KEY, []);
+}
+
+export function useAiDisclosureAccepted() {
+  return useLocalStorage<boolean>(AI_DISCLOSURE_KEY, false);
 }
 
 function emptyContentState(contentId: string): UserContentState {

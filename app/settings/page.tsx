@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { clearAllStorage } from "@/lib/storage";
 import { useProfile, TOPIC_PROFILES, TOPIC_PROFILE_LABEL } from "@/lib/app-state";
@@ -58,6 +59,16 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="card mt-5 p-5">
+        <p className="label">Privacy</p>
+        <p className="mt-2 text-small text-ink-muted">
+          Review how local prototype data and AI feedback submissions are handled.
+        </p>
+        <Link href="/privacy" className="btn-ghost btn-sm mt-3 inline-flex">
+          Privacy details
+        </Link>
       </div>
 
       <div className="card mt-5 border-error/30 p-5">

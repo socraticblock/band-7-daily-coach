@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
+import { AiDisclosureNotice } from "@/components/ui/AiDisclosureNotice";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, SpeakingPayload, SpeakingFeedback, MistakeCode } from "@/lib/types";
-import { useMistakes, useProfile, useSpeakingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
+import { useAiDisclosureAccepted, useMistakes, useProfile, useSpeakingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 import { detectRecordingCapabilities, recordOnce, type RecordingCapabilities } from "@/lib/audio-fallbacks";
 import { BAND_NUMERIC } from "@/lib/types";
 import { requestSpeakingFeedback, requestTranscription } from "@/lib/feedback-client";
@@ -28,6 +29,7 @@ export default function SpeakingPage() {
   const [, setMistakes] = useMistakes();
   const [, setHistory] = useSpeakingFeedback();
   const [, setUserContentState] = useUserContentState();
+  const [aiDisclosureAccepted, setAiDisclosureAccepted] = useAiDisclosureAccepted();
 
   useEffect(() => {
     const all = contentForSkill("speaking");
@@ -58,7 +60,7 @@ export default function SpeakingPage() {
   }, [selectedId, setUserContentState]);
 
   const startRecording = async () => {
-    if (!payload) return;
+    if (!payload || !aiDisclosureAccepted) return;
     setError(null);
     setAudioUrl(null);
     setTranscript("");
@@ -120,7 +122,7 @@ export default function SpeakingPage() {
   };
 
   const handleUpload = async (file: File) => {
-    if (!payload) return;
+    if (!payload || !aiDisclosureAccepted) return;
     setError(null);
     setAudioUrl(URL.createObjectURL(file));
     setFeedback(null);
@@ -216,6 +218,11 @@ export default function SpeakingPage() {
                 )}
               </div>
 
+              <AiDisclosureNotice
+                accepted={aiDisclosureAccepted}
+                onAccept={() => setAiDisclosureAccepted(true)}
+              />
+
               <div className="card p-5">
                 {!cap && <p className="text-small text-ink-muted">Checking your microphone…</p>}
                 {cap && !cap.supported && (
@@ -224,12 +231,13 @@ export default function SpeakingPage() {
                     <p className="text-ink-muted">
                       You can upload an audio file instead. Recording also works on most modern phones and laptops.
                     </p>
-                    <label className="btn-ghost btn-sm cursor-pointer">
+                    <label className={`btn-ghost btn-sm ${aiDisclosureAccepted ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
                       Upload audio file
                       <input
                         type="file"
                         accept="audio/*"
                         className="hidden"
+                        disabled={!aiDisclosureAccepted}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
                           if (f) handleUpload(f);
@@ -241,7 +249,7 @@ export default function SpeakingPage() {
                 {cap && cap.supported && (
                   <div className="flex flex-wrap items-center gap-3">
                     {!recording ? (
-                      <button onClick={startRecording} className="btn-accent" disabled={loading}>
+                      <button onClick={startRecording} className="btn-accent" disabled={loading || !aiDisclosureAccepted}>
                         Start recording
                       </button>
                     ) : (
@@ -251,12 +259,13 @@ export default function SpeakingPage() {
                       </div>
                     )}
                     <span className="text-tiny text-ink-subtle">or</span>
-                    <label className="btn-ghost btn-sm cursor-pointer">
+                    <label className={`btn-ghost btn-sm ${aiDisclosureAccepted ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
                       Upload audio file
                       <input
                         type="file"
                         accept="audio/*"
                         className="hidden"
+                        disabled={!aiDisclosureAccepted}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
                           if (f) handleUpload(f);
