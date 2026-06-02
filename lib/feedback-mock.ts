@@ -1,7 +1,6 @@
 // ============================================================================
-// FEEDBACK MOCK — pure functions, no Node dependencies.
-// Used as a fallback in static export (no API route available) and
-// for the default demo experience when OPENAI_API_KEY is not set.
+// FEEDBACK MOCK - pure functions, no Node dependencies.
+// Used only when NEXT_PUBLIC_DEMO_MODE=true.
 // ============================================================================
 
 import type { WritingFeedback, SpeakingFeedback, MistakeCode } from "./types";
@@ -49,7 +48,7 @@ export function mockWritingFeedback(input: WritingMockInput): WritingFeedback {
     topFixes: [
       "Make the thesis more specific in the first sentence.",
       "Replace generic words (good, bad, important) with more precise academic vocabulary.",
-      "Vary sentence length — long sentences should be split when they carry too many ideas.",
+      "Vary sentence length - long sentences should be split when they carry too many ideas.",
     ],
     beforeAfter: [
       {

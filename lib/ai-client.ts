@@ -1,7 +1,7 @@
 // ============================================================================
-// AI CLIENT — server-side wrapper that calls OpenAI if a key is configured,
-// otherwise returns a structured mock. Mocks are allowed for private prototype
-// UX testing, but production should set OPENAI_API_KEY and disable demo mode.
+// AI CLIENT - server-side wrapper for provider API calls. MiniMax is preferred
+// when MINIMAX_API_KEY is configured; OpenAI remains available as a fallback and
+// for speech transcription. Mock responses are allowed only in explicit demo mode.
 // ============================================================================
 
 import type { WritingFeedback, SpeakingFeedback, MistakeCode } from "@/lib/types";
@@ -29,31 +29,62 @@ export type ClassifierOutput = {
   reviewCard: { front: string; expectedAnswer: string; explanation: string };
 };
 
-const MOCK_ALLOWED = process.env.NEXT_PUBLIC_DEMO_MODE === "true" || process.env.NODE_ENV !== "production";
+type ChatProvider = {
+  apiKey: string;
+  endpoint: string;
+  model: string;
+  name: "MiniMax" | "OpenAI";
+};
 
-function requireApiKey(): string | null {
+const MOCK_ALLOWED = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+
+function getChatProvider(): ChatProvider | null {
+  if (process.env.MINIMAX_API_KEY) {
+    return {
+      apiKey: process.env.MINIMAX_API_KEY,
+      endpoint: "https://api.minimax.io/v1/chat/completions",
+      model: process.env.MINIMAX_MODEL || "MiniMax-M3",
+      name: "MiniMax",
+    };
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return {
+      apiKey: process.env.OPENAI_API_KEY,
+      endpoint: "https://api.openai.com/v1/chat/completions",
+      model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+      name: "OpenAI",
+    };
+  }
+  return null;
+}
+
+function requireOpenAIApiKey(): string | null {
   return process.env.OPENAI_API_KEY || null;
 }
 
 function parseJsonObject<T>(content: string): T {
+  const withoutThinking = content.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  const candidate = withoutThinking.startsWith("{")
+    ? withoutThinking
+    : withoutThinking.slice(withoutThinking.indexOf("{"), withoutThinking.lastIndexOf("}") + 1);
   try {
-    return JSON.parse(content) as T;
+    return JSON.parse(candidate) as T;
   } catch {
     throw new Error("AI returned invalid JSON. Please retry.");
   }
 }
 
-async function postOpenAIChat(apiKey: string, body: unknown): Promise<string> {
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+async function postChat(provider: ChatProvider, body: unknown): Promise<string> {
+  const res = await fetch(provider.endpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${provider.apiKey}`,
     },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
-    throw new Error(`AI provider error ${res.status}. Please check the API key and try again.`);
+    throw new Error(`${provider.name} provider error ${res.status}. Please check the API key and try again.`);
   }
   const j = await res.json() as { choices?: { message?: { content?: string } }[] };
   const content = j.choices?.[0]?.message?.content;
@@ -62,9 +93,9 @@ async function postOpenAIChat(apiKey: string, body: unknown): Promise<string> {
 }
 
 export async function generateFeedback(input: FeedbackInput): Promise<WritingFeedback | SpeakingFeedback> {
-  const apiKey = requireApiKey();
-  if (!apiKey) {
-    if (!MOCK_ALLOWED) throw new Error("AI feedback is not configured. Set OPENAI_API_KEY.");
+  const provider = getChatProvider();
+  if (!provider) {
+    if (!MOCK_ALLOWED) throw new Error("AI feedback is not configured. Add MINIMAX_API_KEY or enable NEXT_PUBLIC_DEMO_MODE=true for demo feedback.");
     return input.kind === "writing"
       ? mockWritingFeedback(input)
       : mockSpeakingFeedback(input);
@@ -75,9 +106,8 @@ export async function generateFeedback(input: FeedbackInput): Promise<WritingFee
     input.kind === "writing"
       ? WRITING_FEEDBACK_USER_TEMPLATE(input.taskType, input.prompt, input.text, input.wordCount)
       : SPEAKING_FEEDBACK_USER_TEMPLATE(input.part, input.prompt, input.transcript, input.transcriptConfidence, input.answerSeconds);
-  const model = process.env.OPENAI_MODEL ?? "gpt-4o-mini";
-  const content = await postOpenAIChat(apiKey, {
-    model,
+  const content = await postChat(provider, {
+    model: provider.model,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: system },
@@ -89,9 +119,9 @@ export async function generateFeedback(input: FeedbackInput): Promise<WritingFee
 }
 
 export async function generateClassification(input: ClassifierInput): Promise<ClassifierOutput> {
-  const apiKey = requireApiKey();
-  if (!apiKey) {
-    if (!MOCK_ALLOWED) throw new Error("Mistake classification is not configured. Set OPENAI_API_KEY.");
+  const provider = getChatProvider();
+  if (!provider) {
+    if (!MOCK_ALLOWED) throw new Error("Mistake classification is not configured. Add MINIMAX_API_KEY or enable NEXT_PUBLIC_DEMO_MODE=true for demo feedback.");
     const defaults: Record<ClassifierInput["skillScope"], MistakeCode> = {
       listening: "L4",
       reading: "R1",
@@ -101,17 +131,17 @@ export async function generateClassification(input: ClassifierInput): Promise<Cl
     return {
       code: defaults[input.skillScope],
       confidence: "low",
-      reason: "No OpenAI key configured; returning demo classifier output.",
+      reason: "No AI provider key configured; returning demo classifier output.",
       reviewCard: {
         front: input.description.slice(0, 120),
-        expectedAnswer: "Recurring pattern — review a similar exercise.",
-        explanation: "Set OPENAI_API_KEY to enable real-time mistake classification.",
+        expectedAnswer: "Recurring pattern - review a similar exercise.",
+        explanation: "Set MINIMAX_API_KEY to enable real-time mistake classification.",
       },
     };
   }
 
-  const content = await postOpenAIChat(apiKey, {
-    model: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+  const content = await postChat(provider, {
+    model: provider.model,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: CLASSIFIER_SYSTEM },
@@ -127,9 +157,9 @@ export async function generateClassification(input: ClassifierInput): Promise<Cl
 }
 
 export async function transcribeAudio(audio: Blob): Promise<{ transcript: string; confidence: "high" | "medium" | "low" }> {
-  const apiKey = requireApiKey();
+  const apiKey = requireOpenAIApiKey();
   if (!apiKey) {
-    if (!MOCK_ALLOWED) throw new Error("Speech transcription is not configured. Set OPENAI_API_KEY.");
+    if (!MOCK_ALLOWED) throw new Error("Speech transcription is not configured. Add OPENAI_API_KEY or enable NEXT_PUBLIC_DEMO_MODE=true for demo transcription.");
     return mockTranscribe();
   }
 

@@ -38,24 +38,26 @@ Open http://localhost:3000.
 
 ## AI and speech configuration
 
-By default, real feedback and speech transcription require `OPENAI_API_KEY`.
+By default, real writing and speaking feedback uses MiniMax when `MINIMAX_API_KEY` is configured. The key must be set only in your local `.env.local` file or in Vercel environment variables, never committed to the repo.
 
 ```bash
 cp .env.example .env.local
-# add your OpenAI key
+# add your MiniMax key locally, or set it in Vercel for deployments
 npm run dev
 ```
 
-Optional environment variables:
+Environment variables:
 
 ```bash
-OPENAI_API_KEY=...
+MINIMAX_API_KEY=
+MINIMAX_MODEL=MiniMax-M3
+OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o-mini
 OPENAI_TRANSCRIPTION_MODEL=whisper-1
-NEXT_PUBLIC_DEMO_MODE=true
+NEXT_PUBLIC_DEMO_MODE=false
 ```
 
-`NEXT_PUBLIC_DEMO_MODE=true` enables structured mock feedback if API routes fail or no key is configured. Keep demo mode off for real student testing so missing API configuration is visible instead of silently returning fake feedback.
+`MINIMAX_API_KEY` and `MINIMAX_MODEL` are used for AI feedback. `OPENAI_API_KEY` is still available as a fallback for feedback and is required for speech transcription until a MiniMax STT path is added. `NEXT_PUBLIC_DEMO_MODE=true` enables structured mock feedback if API routes fail or no key is configured. Keep demo mode off for real student testing so missing API configuration is visible instead of silently returning fake feedback.
 
 ## Project structure
 
@@ -115,7 +117,7 @@ components/
 ## Roadmap
 
 **V0.1 — Prototype (this build)**
-Daily loop, 4 skill trainers, error notebook, mobile-friendly, AI feedback wired. Demo feedback is available only when `NEXT_PUBLIC_DEMO_MODE=true` or during local prototype fallback.
+Daily loop, 4 skill trainers, error notebook, mobile-friendly, AI feedback wired. Demo feedback is available only when `NEXT_PUBLIC_DEMO_MODE=true`.
 
 **V1 — Exam-complete, 3–4 weeks of content**
 32+ listening exercises, 24+ reading passages, 40+ Task 1 prompts, 60+ Task 2 prompts, 300+ speaking prompts, 500+ vocab, 200+ grammar, 4 mini mocks, 2 full mocks, real TTS audio, real AI feedback.
