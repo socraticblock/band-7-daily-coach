@@ -28,6 +28,7 @@ export default function DailyPage() {
   const [mission, setMission] = useState<DailyMission | null>(null);
   const [overrunNote, setOverrunNote] = useState<string | null>(null);
   const [skipNote, setSkipNote] = useState<string | null>(null);
+  const [completionNote, setCompletionNote] = useState<string | null>(null);
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -73,6 +74,11 @@ export default function DailyPage() {
 
   const completeTask = (task: MissionTask) => {
     if (!mission) return;
+    if (requiresPracticeEvidence(task) && !wasAttemptedOnDate(userContentState, task.sourceContentId, today)) {
+      setCompletionNote("Open and complete this assigned practice item before marking it complete.");
+      return;
+    }
+    setCompletionNote(null);
     const now = new Date();
     const elapsed = task.startedAt
       ? (now.getTime() - new Date(task.startedAt).getTime()) / 1000
@@ -91,7 +97,7 @@ export default function DailyPage() {
     };
     updated.status = evaluateMissionStatus(updated.tasks);
     setMission(updated);
-    if (task.skill !== "review") {
+    if (task.skill !== "review" && !requiresPracticeEvidence(task) && !wasAttemptedOnDate(userContentState, task.sourceContentId, today)) {
       setUserContentState((current) =>
         markContentAttempted(current, task.sourceContentId, { attemptedAt: now.toISOString() }),
       );
@@ -165,6 +171,12 @@ export default function DailyPage() {
       {skipNote && (
         <div className="mb-4 card border-warn/40 bg-warn/5 p-4 text-small text-warn">
           {skipNote}
+        </div>
+      )}
+
+      {completionNote && (
+        <div className="mb-4 card border-warn/40 bg-warn/5 p-4 text-small text-warn">
+          {completionNote}
         </div>
       )}
 
@@ -287,6 +299,19 @@ function skippedThisWeek(missions: DailyMission[], today: string): Record<Skill,
     }
   }
   return counts as Record<Skill, number>;
+}
+
+function requiresPracticeEvidence(task: MissionTask): boolean {
+  return task.skill === "writing" || task.skill === "speaking" || task.skill === "reading" || task.skill === "listening";
+}
+
+function wasAttemptedOnDate(
+  states: ReturnType<typeof useUserContentState>[0],
+  contentId: string,
+  date: string,
+): boolean {
+  const state = states.find((s) => s.contentId === contentId);
+  return state?.lastAttemptedAt?.slice(0, 10) === date;
 }
 
 function routeForTask(t: MissionTask): string | null {

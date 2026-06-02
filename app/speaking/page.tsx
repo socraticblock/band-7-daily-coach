@@ -96,28 +96,7 @@ export default function SpeakingPage() {
         );
       }
       setHistory((h) => [...h, { ...fbJson }]);
-      setMistakes((cards) => {
-        const next = [...cards];
-        for (const m of fbJson.savedMistakes) {
-          next.push({
-            id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            userId: profile.id,
-            sourceSkill: "speaking",
-            sourceContentId: selected?.id,
-            code: m.code as MistakeCode,
-            front: m.excerpt,
-            expectedAnswer: m.excerpt,
-            explanation: m.note,
-            originalExcerpt: m.excerpt,
-            createdAt: new Date().toISOString(),
-            reviewDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
-            reviewStage: 0,
-            reviewCount: 0,
-            mastered: false,
-          });
-        }
-        return next;
-      });
+      saveSpeakingMistakes(fbJson);
     } catch (e) {
       setRecording(false);
       setError((e as Error).message);
@@ -150,9 +129,49 @@ export default function SpeakingPage() {
         );
       }
       setHistory((h) => [...h, { ...fbJson }]);
+      saveSpeakingMistakes(fbJson);
     } catch (e) {
       setError((e as Error).message);
     }
+  };
+
+  const saveSpeakingMistakes = (fb: SpeakingFeedback) => {
+    setMistakes((cards) => {
+      const next = [...cards];
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      for (const m of fb.savedMistakes) {
+        const betterPhrase = fb.betterPhrases.find((p) =>
+          p.original.trim().toLowerCase() === m.excerpt.trim().toLowerCase() ||
+          m.excerpt.toLowerCase().includes(p.original.trim().toLowerCase())
+        );
+        const expectedAnswer = betterPhrase?.better ?? m.excerpt;
+        const duplicate = next.some((card) =>
+          card.sourceSkill === "speaking" &&
+          card.sourceContentId === selected?.id &&
+          card.front === m.excerpt &&
+          card.expectedAnswer === expectedAnswer
+        );
+        if (duplicate) continue;
+        next.push({
+          id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          userId: profile.id,
+          sourceSkill: "speaking",
+          sourceContentId: selected?.id,
+          code: m.code as MistakeCode,
+          front: m.excerpt,
+          expectedAnswer,
+          explanation: m.note,
+          originalExcerpt: m.excerpt,
+          improvedExcerpt: betterPhrase?.better,
+          createdAt: new Date().toISOString(),
+          reviewDueAt: tomorrow,
+          reviewStage: 0,
+          reviewCount: 0,
+          mastered: false,
+        });
+      }
+      return next;
+    });
   };
 
   return (
