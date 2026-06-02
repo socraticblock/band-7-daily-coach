@@ -50,12 +50,12 @@ export async function requestSpeakingFeedback(input: SpeakingMockInput): Promise
   }
 }
 
-export async function requestTranscription(audio: Blob): Promise<{ transcript: string; confidence: "high" | "medium" | "low" }> {
+export async function requestTranscription(audio: Blob): Promise<{ transcript: string; confidence: "high" | "medium" | "low"; isDemo?: boolean }> {
   try {
     const fd = new FormData();
     fd.append("audio", audio, "recording.webm");
     const res = await fetch("/api/speech/transcribe", { method: "POST", body: fd });
-    return await safeJson<{ transcript: string; confidence: "high" | "medium" | "low" }>(res);
+    return await safeJson<{ transcript: string; confidence: "high" | "medium" | "low"; isDemo?: boolean }>(res);
   } catch (err) {
     return demoFallback(() => mockTranscribe(), err);
   }

@@ -23,8 +23,8 @@ export type SpeakingMockInput = {
 const DEMO_TRANSCRIPT =
   "I think technology is very important for education. Many students use laptop and phone every day, and they can learn from online. For example, in my country, students now use video and apps to study English. It is more flexible. But also, some students can not focus if they use screen too much, so teachers are still important.";
 
-export function mockTranscribe(): { transcript: string; confidence: "high" | "medium" | "low" } {
-  return { transcript: DEMO_TRANSCRIPT, confidence: "medium" };
+export function mockTranscribe(): { transcript: string; confidence: "high" | "medium" | "low"; isDemo: true } {
+  return { transcript: DEMO_TRANSCRIPT, confidence: "medium", isDemo: true };
 }
 
 export function mockWritingFeedback(input: WritingMockInput): WritingFeedback {
@@ -43,6 +43,7 @@ export function mockWritingFeedback(input: WritingMockInput): WritingFeedback {
     .filter(Boolean);
   const excerpts = Array.from(new Set([firstSentence, ...sentences])).slice(0, 3);
   return {
+    isDemo: true,
     practiceBandRange: ["band6_0", "band6_5"],
     criteria: {
       taskResponse: { score: 6, comment: "You addressed the topic, but the position could be sharper. State a clear thesis in the first sentence." },
@@ -98,6 +99,7 @@ export function mockSpeakingFeedback(input: SpeakingMockInput): SpeakingFeedback
   if (codes.length === 0) codes.push("S4");
 
   return {
+    isDemo: true,
     practiceBandRange: ["band6_0", "band6_5"],
     fluencyCoherence: {
       score: 6,

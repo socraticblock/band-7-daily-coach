@@ -304,6 +304,7 @@ export type ReviewPayload = {
 // ----------------------------------------------------------------------------
 
 export type WritingFeedback = {
+  isDemo?: boolean;
   practiceBandRange: [BandDifficulty, BandDifficulty];
   criteria: {
     taskResponse: { score: number; comment: string };
@@ -318,6 +319,7 @@ export type WritingFeedback = {
 };
 
 export type SpeakingFeedback = {
+  isDemo?: boolean;
   practiceBandRange: [BandDifficulty, BandDifficulty];
   fluencyCoherence: { score: number; comment: string };
   lexicalResource: { score: number; comment: string };

@@ -57,7 +57,9 @@ export default function ProgressPage() {
               <div className="mt-1 text-subtitle font-semibold">
                 Band {BAND_NUMERIC[lastWriting.practiceBandRange[0]].toFixed(1)} - {BAND_NUMERIC[lastWriting.practiceBandRange[1]].toFixed(1)}
               </div>
-              <p className="mt-1 text-tiny text-ink-subtle">From your last submission</p>
+              <p className={lastWriting.isDemo ? "mt-1 text-tiny text-warn" : "mt-1 text-tiny text-ink-subtle"}>
+                {lastWriting.isDemo ? "Demo feedback is not used for real readiness." : "From your last submission"}
+              </p>
               <BandSparkline bands={writingBands} />
             </>
           ) : (
@@ -71,7 +73,9 @@ export default function ProgressPage() {
               <div className="mt-1 text-subtitle font-semibold">
                 Band {BAND_NUMERIC[lastSpeaking.practiceBandRange[0]].toFixed(1)} - {BAND_NUMERIC[lastSpeaking.practiceBandRange[1]].toFixed(1)}
               </div>
-              <p className="mt-1 text-tiny text-ink-subtle">From your last submission</p>
+              <p className={lastSpeaking.isDemo ? "mt-1 text-tiny text-warn" : "mt-1 text-tiny text-ink-subtle"}>
+                {lastSpeaking.isDemo ? "Demo feedback is not used for real readiness." : "From your last submission"}
+              </p>
               <BandSparkline bands={speakingBands} />
             </>
           ) : (

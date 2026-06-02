@@ -156,7 +156,7 @@ export async function generateClassification(input: ClassifierInput): Promise<Cl
   return parsed;
 }
 
-export async function transcribeAudio(audio: Blob): Promise<{ transcript: string; confidence: "high" | "medium" | "low" }> {
+export async function transcribeAudio(audio: Blob): Promise<{ transcript: string; confidence: "high" | "medium" | "low"; isDemo?: boolean }> {
   const apiKey = requireOpenAIApiKey();
   if (!apiKey) {
     if (!MOCK_ALLOWED) throw new Error("Speech transcription is not configured. Add OPENAI_API_KEY or enable NEXT_PUBLIC_DEMO_MODE=true for demo transcription.");

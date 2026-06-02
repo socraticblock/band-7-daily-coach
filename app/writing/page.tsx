@@ -230,6 +230,11 @@ function WritingFeedbackView({ fb }: { fb: WritingFeedback }) {
   const [low, high] = fb.practiceBandRange;
   return (
     <div className="space-y-4 fade-in">
+      {fb.isDemo && (
+        <div className="card border-warn/40 bg-warn/5 p-4 text-small text-warn">
+          Demo feedback - this is not real AI feedback. Set MINIMAX_API_KEY for real feedback.
+        </div>
+      )}
       <div className="card p-5">
         <p className="label">Practice band estimate</p>
         <div className="mt-1 text-subtitle font-semibold">
