@@ -24,6 +24,8 @@ A scalable product that starts private. Daily missions, rubric-anchored AI feedb
 
 This is **V0.1 — prototype**. The daily loop is wired, the mission engine works, the mistake taxonomy is closed, the writing/speaking feedback flow runs end-to-end, the listening/reading trainers are stubbed. Content depth is intentionally thin (see roadmap below). TTS audio is not yet generated.
 
+V0.1 is suitable for testing the learning loop. It is **not yet a complete IELTS Band 7 preparation program**. See `docs/TRAINING-MATERIAL-AUDIT.md` for the content readiness audit.
+
 ## Quick start
 
 ```bash
@@ -34,13 +36,26 @@ npm run dev
 
 Open http://localhost:3000.
 
-Without API keys, the AI feedback routes return a structured mock so the full UX is testable. To enable real AI feedback, copy `.env.example` to `.env.local` and set `OPENAI_API_KEY`.
+## AI and speech configuration
+
+By default, real feedback and speech transcription require `OPENAI_API_KEY`.
 
 ```bash
 cp .env.example .env.local
 # add your OpenAI key
 npm run dev
 ```
+
+Optional environment variables:
+
+```bash
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-4o-mini
+OPENAI_TRANSCRIPTION_MODEL=whisper-1
+NEXT_PUBLIC_DEMO_MODE=true
+```
+
+`NEXT_PUBLIC_DEMO_MODE=true` enables structured mock feedback if API routes fail or no key is configured. Keep demo mode off for real student testing so missing API configuration is visible instead of silently returning fake feedback.
 
 ## Project structure
 
@@ -60,7 +75,7 @@ lib/
   content-loader.ts         — loads content from /content
   audio-fallbacks.ts        — mobile audio + recording fallbacks
   ai-prompts.ts             — locked AI system + user templates
-  ai-client.ts              — OpenAI wrapper with mock fallback
+  ai-client.ts              — OpenAI wrapper with explicit demo/mock mode
   app-state.ts              — localStorage-backed app state
   storage.ts                — SSR-safe localStorage hook
 content/
@@ -70,6 +85,8 @@ content/
   grammar.ts                — 30 drills
   listening/bank.json       — 2 listening sets
   reading/bank.json         — 2 reading passages
+docs/
+  TRAINING-MATERIAL-AUDIT.md — what is usable now vs missing for V1
 components/
   ui/                       — design system (Button, Card, Disclaimer)
   layout/                   — AppShell, PublicNav, PublicFooter
@@ -98,7 +115,7 @@ components/
 ## Roadmap
 
 **V0.1 — Prototype (this build)**
-Daily loop, 4 skill trainers, error notebook, mobile-friendly, AI feedback wired (mock by default).
+Daily loop, 4 skill trainers, error notebook, mobile-friendly, AI feedback wired. Demo feedback is available only when `NEXT_PUBLIC_DEMO_MODE=true` or during local prototype fallback.
 
 **V1 — Exam-complete, 3–4 weeks of content**
 32+ listening exercises, 24+ reading passages, 40+ Task 1 prompts, 60+ Task 2 prompts, 300+ speaking prompts, 500+ vocab, 200+ grammar, 4 mini mocks, 2 full mocks, real TTS audio, real AI feedback.
@@ -112,8 +129,8 @@ Payments, admin CMS, SEO pages, teacher review, mobile PWA, profession topic pac
 ## What V0.1 does not include (yet)
 
 - Real TTS audio. The transcript is shown instead.
-- Speech-to-text on the actual recording. Without `OPENAI_API_KEY`, the speaking trainer returns a placeholder transcript.
 - Listening/Reading content beyond 2 sets each. The Daily Mission will rotate through them quickly.
+- Full mock exams.
 - Admin panel. Content is in static files; updates require a redeploy.
 - Payments. The product is private.
 
