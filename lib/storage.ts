@@ -7,6 +7,8 @@
 
 import { useEffect, useState } from "react";
 
+const APP_STORAGE_PREFIX = "b7dc.";
+
 export function useLocalStorage<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(initial);
   const [hydrated, setHydrated] = useState(false);
@@ -39,5 +41,9 @@ export function useLocalStorage<T>(key: string, initial: T) {
 
 export function clearAllStorage() {
   if (typeof window === "undefined") return;
-  window.localStorage.clear();
+  for (const key of Object.keys(window.localStorage)) {
+    if (key.startsWith(APP_STORAGE_PREFIX)) {
+      window.localStorage.removeItem(key);
+    }
+  }
 }
