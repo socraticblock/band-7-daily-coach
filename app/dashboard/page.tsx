@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
-import { useProfile, useMistakes, useMissions, useStats } from "@/lib/app-state";
+import { useProfile, useMistakes, useMissions, useStats, useUserContentState, markContentShown } from "@/lib/app-state";
 import { loadAllContent } from "@/lib/content-loader";
 import { generateDailyMission } from "@/lib/mission-engine";
 import { pickDailyReviewQueue } from "@/lib/spaced-repetition";
@@ -14,8 +14,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [profile, , profileHydrated] = useProfile();
   const [mistakes] = useMistakes();
-  const [missions] = useMissions();
+  const [missions, setMissions] = useMissions();
   const [stats] = useStats();
+  const [userContentState, setUserContentState] = useUserContentState();
 
   // Wait for localStorage hydration before deciding to redirect.
   useEffect(() => {
@@ -29,18 +30,36 @@ export default function DashboardPage() {
   const dueCount = pickDailyReviewQueue(mistakes, 8).length;
   const completedMissions = missions.filter((m) => m.status === "completed" || m.status === "partially_completed").length;
 
+  useEffect(() => {
+    if (!profileHydrated || !profile.onboarded || todaysMission) return;
+    const result = generateDailyMission({
+      profile,
+      content: loadAllContent(),
+      userState: userContentState,
+      dueCards: mistakes,
+      now: new Date(),
+    });
+    setMissions((current) => [...current.filter((m) => m.date !== today), result.mission]);
+    setUserContentState((current) =>
+      markContentShown(
+        current,
+        result.mission.tasks.filter((t) => t.skill !== "review").map((t) => t.sourceContentId),
+      ),
+    );
+  }, [profileHydrated, profile, todaysMission, userContentState, mistakes, today, setMissions, setUserContentState]);
+
   const preview = useMemo(() => {
     if (!profile.onboarded) return null;
     if (todaysMission) return todaysMission;
     const result = generateDailyMission({
       profile,
       content: loadAllContent(),
-      userState: [],
+      userState: userContentState,
       dueCards: mistakes,
       now: new Date(),
     });
     return result.mission;
-  }, [profile, todaysMission, mistakes]);
+  }, [profile, todaysMission, mistakes, userContentState]);
 
   // If not onboarded (and we've hydrated), show a loading state until the redirect happens.
   if (profileHydrated && !profile.onboarded) {

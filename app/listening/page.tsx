@@ -5,6 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, ListeningPayload, ListeningQuestion } from "@/lib/types";
 import { detectAudioCapabilities, type AudioPlaybackCapabilities } from "@/lib/audio-fallbacks";
+import { useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 
 export default function ListeningPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
@@ -13,6 +14,7 @@ export default function ListeningPage() {
   const [showTranscript, setShowTranscript] = useState(false);
   const [checked, setChecked] = useState(false);
   const [cap, setCap] = useState<AudioPlaybackCapabilities | null>(null);
+  const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
     setItems(contentForSkill("listening"));
@@ -27,10 +29,27 @@ export default function ListeningPage() {
   const selected = typeof selectedId === "string" ? getContentById(selectedId) : undefined;
   const payload = selected?.payload as ListeningPayload | undefined;
 
+  useEffect(() => {
+    if (!selectedId) return;
+    setUserContentState((current) => markContentStarted(current, selectedId));
+  }, [selectedId, setUserContentState]);
+
   const score = payload?.questions.reduce(
     (acc, q) => (normalize(answers[q.id]) === normalize(q.answer) ? acc + 1 : acc),
     0,
   ) ?? 0;
+
+  const checkAnswers = () => {
+    if (selected && payload && !checked) {
+      setUserContentState((current) =>
+        markContentAttempted(current, selected.id, {
+          score: payload.questions.length > 0 ? score / payload.questions.length : 0,
+          receptiveMastery: true,
+        }),
+      );
+    }
+    setChecked(true);
+  };
 
   return (
     <AppShell>
@@ -136,7 +155,7 @@ export default function ListeningPage() {
               </ol>
 
               <div className="flex flex-wrap items-center gap-3">
-                <button onClick={() => setChecked(true)} className="btn-accent btn-sm">
+                <button onClick={checkAnswers} className="btn-accent btn-sm">
                   Check answers
                 </button>
                 <button

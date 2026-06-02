@@ -123,7 +123,7 @@ export const TOPIC_PROFILE_LABEL: Record<TopicProfile, string> = {
 
 export type ReviewStatus = "draft" | "approved" | "retired";
 export type CopyrightStatus = "original" | "licensed" | "linked";
-export type MasteryStatus = "unseen" | "in_progress" | "mastered";
+export type MasteryStatus = "unseen" | "shown" | "in_progress" | "attempted" | "mastered";
 
 export type ContentItem = {
   id: string;
@@ -142,12 +142,14 @@ export type ContentItem = {
 };
 
 export type UserContentState = {
-  userId: string;
   contentId: string;
   lastShownAt?: string;
+  lastStartedAt?: string;
   lastAttemptedAt?: string;
-  masteryStatus: MasteryStatus;
   attempts: number;
+  completedCount: number;
+  skippedCount: number;
+  masteryStatus: MasteryStatus;
   bestScore?: number;
 };
 

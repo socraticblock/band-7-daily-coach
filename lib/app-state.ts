@@ -67,6 +67,101 @@ export function useSpeakingFeedback() {
   return useLocalStorage<SpeakingFeedback[]>(SPEAKING_FEEDBACK_KEY, []);
 }
 
+function emptyContentState(contentId: string): UserContentState {
+  return {
+    contentId,
+    attempts: 0,
+    completedCount: 0,
+    skippedCount: 0,
+    masteryStatus: "unseen",
+  };
+}
+
+function normalizeContentState(state: UserContentState): UserContentState {
+  return {
+    ...emptyContentState(state.contentId),
+    ...state,
+    masteryStatus: state.masteryStatus ?? "unseen",
+  };
+}
+
+function updateContentStates(
+  states: UserContentState[],
+  contentIds: string[],
+  updater: (state: UserContentState) => UserContentState,
+): UserContentState[] {
+  const ids = Array.from(new Set(contentIds.filter(Boolean)));
+  if (ids.length === 0) return states;
+  const map = new Map(states.map((s) => [s.contentId, normalizeContentState(s)]));
+  for (const contentId of ids) {
+    map.set(contentId, updater(map.get(contentId) ?? emptyContentState(contentId)));
+  }
+  return Array.from(map.values());
+}
+
+export function markContentShown(
+  states: UserContentState[],
+  contentIds: string[],
+  shownAt = new Date().toISOString(),
+): UserContentState[] {
+  return updateContentStates(states, contentIds, (state) => ({
+    ...state,
+    lastShownAt: shownAt,
+    masteryStatus: state.masteryStatus === "unseen" ? "shown" : state.masteryStatus,
+  }));
+}
+
+export function markContentStarted(
+  states: UserContentState[],
+  contentId: string,
+  startedAt = new Date().toISOString(),
+): UserContentState[] {
+  return updateContentStates(states, [contentId], (state) => ({
+    ...state,
+    lastStartedAt: startedAt,
+    masteryStatus: state.masteryStatus === "mastered" ? "mastered" : "in_progress",
+  }));
+}
+
+export function markContentAttempted(
+  states: UserContentState[],
+  contentId: string,
+  options: { attemptedAt?: string; score?: number; mastery?: "attempted" | "mastered"; receptiveMastery?: boolean } = {},
+): UserContentState[] {
+  const attemptedAt = options.attemptedAt ?? new Date().toISOString();
+  return updateContentStates(states, [contentId], (state) => {
+    const bestScore = typeof options.score === "number"
+      ? Math.max(state.bestScore ?? Number.NEGATIVE_INFINITY, options.score)
+      : state.bestScore;
+    const reachedSecondPerfect =
+      options.receptiveMastery === true &&
+      typeof options.score === "number" &&
+      options.score >= 1 &&
+      (state.bestScore ?? 0) >= 1;
+    return {
+      ...state,
+      attempts: state.attempts + 1,
+      completedCount: state.completedCount + 1,
+      lastAttemptedAt: attemptedAt,
+      bestScore,
+      masteryStatus: options.mastery === "mastered" || reachedSecondPerfect
+        ? "mastered"
+        : "attempted",
+    };
+  });
+}
+
+export function markContentSkipped(
+  states: UserContentState[],
+  contentId: string,
+): UserContentState[] {
+  return updateContentStates(states, [contentId], (state) => ({
+    ...state,
+    skippedCount: state.skippedCount + 1,
+    masteryStatus: state.masteryStatus === "mastered" ? "mastered" : state.masteryStatus === "unseen" ? "shown" : state.masteryStatus,
+  }));
+}
+
 export function setOnboarded(profile: UserProfile): UserProfile {
   return { ...profile, onboarded: true };
 }

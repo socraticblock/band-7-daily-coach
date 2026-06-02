@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, WritingPayload, WritingFeedback, MistakeCode } from "@/lib/types";
-import { useProfile, useMistakes, useWritingFeedback } from "@/lib/app-state";
+import { useProfile, useMistakes, useWritingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 import { BAND_NUMERIC } from "@/lib/types";
 import { requestWritingFeedback } from "@/lib/feedback-client";
 
@@ -19,6 +19,7 @@ export default function WritingPage() {
   const [profile] = useProfile();
   const [, setMistakes] = useMistakes();
   const [, setHistory] = useWritingFeedback();
+  const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
     const all = contentForSkill("writing");
@@ -29,6 +30,11 @@ export default function WritingPage() {
   const selected = selectedId ? getContentById(selectedId) : undefined;
   const payload = selected?.payload as WritingPayload | undefined;
   const wordCount = text.trim() === "" ? 0 : text.trim().split(/\s+/).length;
+
+  useEffect(() => {
+    if (!selectedId) return;
+    setUserContentState((current) => markContentStarted(current, selectedId));
+  }, [selectedId, setUserContentState]);
 
   const submit = async () => {
     if (!selected || !payload) return;
@@ -43,6 +49,10 @@ export default function WritingPage() {
         wordCount,
       });
       setFeedback(data);
+      const estimatedScore = (BAND_NUMERIC[data.practiceBandRange[0]] + BAND_NUMERIC[data.practiceBandRange[1]]) / 2;
+      setUserContentState((current) =>
+        markContentAttempted(current, selected.id, { score: estimatedScore, mastery: "attempted" }),
+      );
       // Save feedback history
       setHistory((h) => [...h, { ...data }]);
       // Convert top mistakes to error notebook

@@ -3,7 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
-import { useProfile, useMistakes, useMissions, useStats, bumpStreak } from "@/lib/app-state";
+import {
+  useProfile,
+  useMistakes,
+  useMissions,
+  useStats,
+  useUserContentState,
+  bumpStreak,
+  markContentAttempted,
+  markContentShown,
+  markContentSkipped,
+  markContentStarted,
+} from "@/lib/app-state";
 import { loadAllContent, getContentById } from "@/lib/content-loader";
 import { generateDailyMission, checkOverrun } from "@/lib/mission-engine";
 import type { DailyMission, MissionTask } from "@/lib/types";
@@ -13,6 +24,7 @@ export default function DailyPage() {
   const [mistakes, setMistakes] = useMistakes();
   const [missions, setMissions] = useMissions();
   const [stats, setStats] = useStats();
+  const [userContentState, setUserContentState] = useUserContentState();
   const [mission, setMission] = useState<DailyMission | null>(null);
   const [overrunNote, setOverrunNote] = useState<string | null>(null);
 
@@ -28,22 +40,34 @@ export default function DailyPage() {
     const result = generateDailyMission({
       profile,
       content: loadAllContent(),
-      userState: [],
+      userState: userContentState,
       dueCards: mistakes,
       now: new Date(),
     });
     setMission(result.mission);
-  }, [profile, mistakes, missions, today]);
+    setMissions((current) => [...current.filter((m) => m.date !== today), result.mission]);
+    setUserContentState((current) =>
+      markContentShown(
+        current,
+        result.mission.tasks.filter((t) => t.skill !== "review").map((t) => t.sourceContentId),
+      ),
+    );
+  }, [profile, mistakes, missions, today, userContentState, setMissions, setUserContentState]);
 
   const startTask = (task: MissionTask) => {
     if (!mission) return;
-    setMission({
+    const updated: DailyMission = {
       ...mission,
       status: "in_progress",
       tasks: mission.tasks.map((t) =>
         t.id === task.id ? { ...t, status: "started", startedAt: new Date().toISOString() } : t,
       ),
-    });
+    };
+    setMission(updated);
+    setMissions((current) => [...current.filter((m) => m.date !== today), updated]);
+    if (task.skill !== "review") {
+      setUserContentState((current) => markContentStarted(current, task.sourceContentId));
+    }
   };
 
   const completeTask = (task: MissionTask) => {
@@ -67,6 +91,11 @@ export default function DailyPage() {
     const allDone = updated.tasks.every((t) => t.status === "completed" || t.status === "skipped");
     updated.status = allDone ? "completed" : "partially_completed";
     setMission(updated);
+    if (task.skill !== "review") {
+      setUserContentState((current) =>
+        markContentAttempted(current, task.sourceContentId, { attemptedAt: now.toISOString() }),
+      );
+    }
 
     // Persist
     const next = missions.filter((m) => m.date !== today);
@@ -103,6 +132,9 @@ export default function DailyPage() {
       ),
     };
     setMission(updated);
+    if (task.skill !== "review") {
+      setUserContentState((current) => markContentSkipped(current, task.sourceContentId));
+    }
     const next = missions.filter((m) => m.date !== today);
     setMissions([...next, updated]);
   };

@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, ReadingPayload, ReadingQuestion } from "@/lib/types";
+import { useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 
 export default function ReadingPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [checked, setChecked] = useState(false);
+  const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
     setItems(contentForSkill("reading"));
@@ -21,10 +23,27 @@ export default function ReadingPage() {
   const selected = typeof selectedId === "string" ? getContentById(selectedId) : undefined;
   const payload = selected?.payload as ReadingPayload | undefined;
 
+  useEffect(() => {
+    if (!selectedId) return;
+    setUserContentState((current) => markContentStarted(current, selectedId));
+  }, [selectedId, setUserContentState]);
+
   const score = payload?.questions.reduce(
     (acc, q) => (normalize(answers[q.id]) === normalize(q.answer) ? acc + 1 : acc),
     0,
   ) ?? 0;
+
+  const checkAnswers = () => {
+    if (selected && payload && !checked) {
+      setUserContentState((current) =>
+        markContentAttempted(current, selected.id, {
+          score: payload.questions.length > 0 ? score / payload.questions.length : 0,
+          receptiveMastery: true,
+        }),
+      );
+    }
+    setChecked(true);
+  };
 
   return (
     <AppShell>
@@ -116,7 +135,7 @@ export default function ReadingPage() {
               </ol>
 
               <div className="flex items-center gap-3">
-                <button onClick={() => setChecked(true)} className="btn-accent btn-sm">
+                <button onClick={checkAnswers} className="btn-accent btn-sm">
                   Check answers
                 </button>
                 {checked && (

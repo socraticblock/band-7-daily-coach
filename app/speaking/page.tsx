@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, SpeakingPayload, SpeakingFeedback, MistakeCode } from "@/lib/types";
-import { useMistakes, useProfile, useSpeakingFeedback } from "@/lib/app-state";
+import { useMistakes, useProfile, useSpeakingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 import { detectRecordingCapabilities, recordOnce, type RecordingCapabilities } from "@/lib/audio-fallbacks";
 import { BAND_NUMERIC } from "@/lib/types";
 import { requestSpeakingFeedback, requestTranscription } from "@/lib/feedback-client";
@@ -24,6 +24,7 @@ export default function SpeakingPage() {
   const [profile] = useProfile();
   const [, setMistakes] = useMistakes();
   const [, setHistory] = useSpeakingFeedback();
+  const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
     setPrompts(contentForSkill("speaking"));
@@ -37,6 +38,11 @@ export default function SpeakingPage() {
 
   const selected = selectedId ? getContentById(selectedId) : undefined;
   const payload = selected?.payload as SpeakingPayload | undefined;
+
+  useEffect(() => {
+    if (!selectedId) return;
+    setUserContentState((current) => markContentStarted(current, selectedId));
+  }, [selectedId, setUserContentState]);
 
   const startRecording = async () => {
     if (!payload) return;
@@ -65,6 +71,12 @@ export default function SpeakingPage() {
         answerSeconds: result.durationSeconds,
       });
       setFeedback(fbJson);
+      const estimatedScore = (BAND_NUMERIC[fbJson.practiceBandRange[0]] + BAND_NUMERIC[fbJson.practiceBandRange[1]]) / 2;
+      if (selected?.id) {
+        setUserContentState((current) =>
+          markContentAttempted(current, selected.id, { score: estimatedScore, mastery: "attempted" }),
+        );
+      }
       setHistory((h) => [...h, { ...fbJson }]);
       setMistakes((cards) => {
         const next = [...cards];
@@ -111,6 +123,12 @@ export default function SpeakingPage() {
         answerSeconds: 0,
       });
       setFeedback(fbJson);
+      const estimatedScore = (BAND_NUMERIC[fbJson.practiceBandRange[0]] + BAND_NUMERIC[fbJson.practiceBandRange[1]]) / 2;
+      if (selected?.id) {
+        setUserContentState((current) =>
+          markContentAttempted(current, selected.id, { score: estimatedScore, mastery: "attempted" }),
+        );
+      }
       setHistory((h) => [...h, { ...fbJson }]);
     } catch (e) {
       setError((e as Error).message);
