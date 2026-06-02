@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
-import type { ContentItem, ListeningPayload, ListeningQuestion } from "@/lib/types";
+import type { ContentItem, ListeningPayload, ListeningQuestion, MistakeCode } from "@/lib/types";
 import { detectAudioCapabilities, type AudioPlaybackCapabilities } from "@/lib/audio-fallbacks";
-import { useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
+import { useMistakes, useProfile, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 
 export default function ListeningPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
@@ -17,6 +17,9 @@ export default function ListeningPage() {
   const [cap, setCap] = useState<AudioPlaybackCapabilities | null>(null);
   const [missionContentId, setMissionContentId] = useState<string | null>(null);
   const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [profile] = useProfile();
+  const [mistakes, setMistakes] = useMistakes();
   const [, setUserContentState] = useUserContentState();
 
   useEffect(() => {
@@ -60,6 +63,42 @@ export default function ListeningPage() {
           receptiveMastery: true,
         }),
       );
+      const wrongQuestions = payload.questions.filter((q) => normalize(answers[q.id]) !== normalize(q.answer));
+      if (wrongQuestions.length > 0) {
+        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        const next = [...mistakes];
+        for (const q of wrongQuestions) {
+          const duplicate = next.some((card) =>
+            card.sourceSkill === "listening" &&
+            card.sourceContentId === selected.id &&
+            card.front === q.prompt &&
+            card.expectedAnswer === q.answer
+          );
+          if (duplicate) continue;
+          next.push({
+            id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            userId: profile.id,
+            sourceSkill: "listening",
+            sourceContentId: selected.id,
+            code: listeningMistakeCode(q, answers[q.id] ?? ""),
+            front: q.prompt,
+            expectedAnswer: q.answer,
+            explanation: listeningExplanation(q),
+            createdAt: new Date().toISOString(),
+            reviewDueAt: tomorrow,
+            reviewStage: 0,
+            reviewCount: 0,
+            mastered: false,
+          });
+        }
+        const savedCount = next.length - mistakes.length;
+        setMistakes(next);
+        setSavedMessage(savedCount > 0
+          ? `Saved ${savedCount} listening mistake${savedCount === 1 ? "" : "s"} to Error Notebook.`
+          : "Listening mistakes were already saved to Error Notebook.");
+      } else {
+        setSavedMessage(null);
+      }
     }
     setChecked(true);
   };
@@ -79,6 +118,7 @@ export default function ListeningPage() {
                     setAnswers({});
                     setShowTranscript(false);
                     setChecked(false);
+                    setSavedMessage(null);
                   }}
                   disabled={missionContentId !== null && p.id !== missionContentId}
                   className={`w-full rounded border px-3 py-2 text-left text-small transition-colors ${
@@ -189,8 +229,9 @@ export default function ListeningPage() {
                 <button
                   onClick={() => setShowTranscript((v) => !v)}
                   className="btn-ghost btn-sm"
+                  disabled={!checked}
                 >
-                  {showTranscript ? "Hide transcript" : "Show transcript"}
+                  {showTranscript ? "Hide transcript" : "Review transcript"}
                 </button>
                 {checked && (
                   <span className="text-small text-ink-muted">
@@ -199,9 +240,22 @@ export default function ListeningPage() {
                 )}
               </div>
 
+              {!checked && (
+                <p className="text-tiny text-ink-subtle">
+                  Transcript is for review after checking answers.
+                </p>
+              )}
+
+              {savedMessage && (
+                <div className="card border-success/40 bg-success/5 p-4 text-small text-success">
+                  {savedMessage}
+                </div>
+              )}
+
               {showTranscript && (
                 <div className="card p-5 fade-in">
                   <p className="label">Transcript</p>
+                  <p className="mt-1 text-tiny text-ink-subtle">Review only after answering.</p>
                   <p className="mt-2 whitespace-pre-line font-serif text-small leading-relaxed text-ink-muted">
                     {payload.transcript}
                   </p>
@@ -231,4 +285,46 @@ function AnswerReview({ q, userAnswer }: { q: ListeningQuestion; userAnswer: str
 
 function normalize(s: string | undefined): string {
   return (s ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function listeningMistakeCode(q: ListeningQuestion, userAnswer: string): MistakeCode {
+  const answer = normalize(userAnswer);
+  const correct = normalize(q.answer);
+  const combined = `${q.prompt} ${q.distractorNote ?? ""}`.toLowerCase();
+  if (isNearSpelling(answer, correct)) return "L1";
+  if (/\d/.test(q.answer) && answer !== correct) return "L2";
+  if (q.distractorNote) return "L4";
+  if (combined.includes("paraphrase") || combined.includes("synonym")) return "L5";
+  return "L6";
+}
+
+function listeningExplanation(q: ListeningQuestion): string {
+  return [
+    q.evidenceTimestamp ? `Evidence timestamp: ${q.evidenceTimestamp}.` : "",
+    q.distractorNote ? `Note: ${q.distractorNote}` : "Review the answer wording carefully.",
+  ].filter(Boolean).join(" ");
+}
+
+function isNearSpelling(answer: string, correct: string): boolean {
+  const a = answer.replace(/[^a-z]/g, "");
+  const b = correct.replace(/[^a-z]/g, "");
+  if (a.length < 4 || b.length < 4) return false;
+  if (a === b) return false;
+  return levenshtein(a, b) <= 2;
+}
+
+function levenshtein(a: string, b: string): number {
+  const previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 0; i < a.length; i += 1) {
+    const current = [i + 1];
+    for (let j = 0; j < b.length; j += 1) {
+      current[j + 1] = Math.min(
+        current[j]! + 1,
+        previous[j + 1]! + 1,
+        previous[j]! + (a[i] === b[j] ? 0 : 1),
+      );
+    }
+    previous.splice(0, previous.length, ...current);
+  }
+  return previous[b.length] ?? 0;
 }
