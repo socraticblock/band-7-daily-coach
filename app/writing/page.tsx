@@ -7,7 +7,7 @@ import { AiDisclosureNotice } from "@/components/ui/AiDisclosureNotice";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, WritingPayload, WritingFeedback, MistakeCode } from "@/lib/types";
 import { useAiDisclosureAccepted, useProfile, useMistakes, useWritingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
-import { BAND_NUMERIC } from "@/lib/types";
+import { bandRangeAverage, formatBandRange } from "@/lib/band-utils";
 import { requestWritingFeedback } from "@/lib/feedback-client";
 
 export default function WritingPage() {
@@ -65,9 +65,12 @@ export default function WritingPage() {
         wordCount,
       });
       setFeedback(data);
-      const estimatedScore = (BAND_NUMERIC[data.practiceBandRange[0]] + BAND_NUMERIC[data.practiceBandRange[1]]) / 2;
+      const estimatedScore = bandRangeAverage(data.practiceBandRange);
       setUserContentState((current) =>
-        markContentAttempted(current, selected.id, { score: estimatedScore, mastery: "attempted" }),
+        markContentAttempted(current, selected.id, {
+          ...(estimatedScore === null ? {} : { score: estimatedScore }),
+          mastery: "attempted",
+        }),
       );
       // Save feedback history
       setHistory((h) => [...h, { ...data }]);
@@ -227,7 +230,6 @@ export default function WritingPage() {
 }
 
 function WritingFeedbackView({ fb }: { fb: WritingFeedback }) {
-  const [low, high] = fb.practiceBandRange;
   return (
     <div className="space-y-4 fade-in">
       {fb.isDemo && (
@@ -238,7 +240,7 @@ function WritingFeedbackView({ fb }: { fb: WritingFeedback }) {
       <div className="card p-5">
         <p className="label">Practice band estimate</p>
         <div className="mt-1 text-subtitle font-semibold">
-          Band {BAND_NUMERIC[low].toFixed(1)} – {BAND_NUMERIC[high].toFixed(1)}
+          {formatBandRange(fb.practiceBandRange)}
         </div>
         <p className="mt-1 text-tiny text-ink-subtle">
           Estimate only. Not an official IELTS score.
