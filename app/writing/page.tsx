@@ -9,6 +9,10 @@ import type { ContentItem, WritingPayload, WritingFeedback, MistakeCode } from "
 import { useAiDisclosureAccepted, useProfile, useMistakes, useWritingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 import { bandRangeAverage, formatBandRange } from "@/lib/band-utils";
 import { requestWritingFeedback } from "@/lib/feedback-client";
+import { validateWritingResponseQuality } from "@/lib/writing-response-quality";
+
+const API_ERROR_MESSAGE =
+  "Feedback could not be generated. Your writing was not lost. Please try again in a moment.";
 
 export default function WritingPage() {
   const [prompts, setPrompts] = useState<ContentItem[]>([]);
@@ -54,6 +58,14 @@ export default function WritingPage() {
 
   const submit = async () => {
     if (!selected || !payload || !aiDisclosureAccepted) return;
+
+    const quality = validateWritingResponseQuality(text);
+    if (!quality.ok) {
+      setError(quality.message);
+      setFeedback(null);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setFeedback(null);
@@ -106,8 +118,8 @@ export default function WritingPage() {
         }
         return next;
       });
-    } catch (e) {
-      setError((e as Error).message);
+    } catch {
+      setError(API_ERROR_MESSAGE);
     } finally {
       setLoading(false);
     }
@@ -194,13 +206,14 @@ export default function WritingPage() {
                   className="textarea mt-2 font-serif text-body"
                   placeholder="Type your response here. Take your time."
                   value={text}
+                  readOnly={loading}
                   onChange={(e) => setText(e.target.value)}
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 <button onClick={submit} disabled={loading || text.trim().length < 5 || !aiDisclosureAccepted} className="btn-accent">
-                  {loading ? "Generating feedback…" : "Submit for feedback"}
+                  {loading ? "Reviewing your answer…" : "Submit for feedback"}
                 </button>
                 {payload.minimumWords && wordCount < payload.minimumWords && (
                   <span className="text-tiny text-warn">
@@ -214,13 +227,33 @@ export default function WritingPage() {
                 onAccept={() => setAiDisclosureAccepted(true)}
               />
 
+              {loading && (
+                <div className="card border-accent/30 bg-accent/5 p-4 text-small text-ink-muted">
+                  <p className="font-medium text-ink">Reviewing your answer…</p>
+                  <p className="mt-2">
+                    Your coach is checking task response, structure, vocabulary, grammar,
+                    and practical mistakes for your Error Notebook.
+                  </p>
+                  <p className="mt-2 text-tiny text-ink-subtle">
+                    This usually takes 20–60 seconds. Please keep this tab open.
+                  </p>
+                </div>
+              )}
+
               {error && (
                 <div className="card border-error/40 bg-error/5 p-4 text-small text-error">
                   {error}
                 </div>
               )}
 
-              {feedback && <WritingFeedbackView fb={feedback} />}
+              {feedback && (
+                <>
+                  <div className="card border-success/40 bg-success/5 p-4 text-small text-success">
+                    Feedback ready. This is a practice estimate, not an official IELTS score.
+                  </div>
+                  <WritingFeedbackView fb={feedback} />
+                </>
+              )}
             </div>
           )}
         </section>
