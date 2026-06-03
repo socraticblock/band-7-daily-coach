@@ -7,6 +7,7 @@ import { PracticeModeGuide } from "@/components/ielts/PracticeModeGuide";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, MistakeCode, ReadingPayload, ReadingQuestion } from "@/lib/types";
 import { useMistakes, useProfile, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
+import { DISABLE_WRITING_ASSIST_PROPS } from "@/lib/input-assist";
 
 export default function ReadingPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
@@ -222,6 +223,7 @@ export default function ReadingPage() {
                           disabled={checked}
                           readOnly={checked}
                           onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                          {...DISABLE_WRITING_ASSIST_PROPS}
                         />
                       )}
                       {checked && (

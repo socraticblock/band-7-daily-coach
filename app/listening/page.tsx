@@ -8,6 +8,7 @@ import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, ListeningPayload, ListeningQuestion, MistakeCode } from "@/lib/types";
 import { detectAudioCapabilities, type AudioPlaybackCapabilities } from "@/lib/audio-fallbacks";
 import { useMistakes, useProfile, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
+import { DISABLE_WRITING_ASSIST_PROPS } from "@/lib/input-assist";
 
 export default function ListeningPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
@@ -250,6 +251,7 @@ export default function ListeningPage() {
                         disabled={checked}
                         readOnly={checked}
                         onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                        {...DISABLE_WRITING_ASSIST_PROPS}
                       />
                     )}
                     {checked && (

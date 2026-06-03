@@ -11,6 +11,7 @@ import { useAiDisclosureAccepted, useProfile, useMistakes, useWritingFeedback, u
 import { bandRangeAverage, formatBandRange } from "@/lib/band-utils";
 import { requestWritingFeedback } from "@/lib/feedback-client";
 import { validateWritingResponseQuality } from "@/lib/writing-response-quality";
+import { DISABLE_WRITING_ASSIST_PROPS } from "@/lib/input-assist";
 
 const API_ERROR_MESSAGE =
   "Feedback could not be generated. Your writing was not lost. Please try again in a moment.";
@@ -215,6 +216,7 @@ export default function WritingPage() {
                   value={text}
                   readOnly={loading}
                   onChange={(e) => setText(e.target.value)}
+                  {...DISABLE_WRITING_ASSIST_PROPS}
                 />
               </div>
 

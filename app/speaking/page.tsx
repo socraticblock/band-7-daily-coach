@@ -11,6 +11,7 @@ import { useAiDisclosureAccepted, useMistakes, useProfile, useSpeakingFeedback, 
 import { detectRecordingCapabilities, recordOnce, type RecordingCapabilities } from "@/lib/audio-fallbacks";
 import { bandRangeAverage, formatBandRange } from "@/lib/band-utils";
 import { requestSpeakingFeedback, requestTranscription } from "@/lib/feedback-client";
+import { DISABLE_WRITING_ASSIST_PROPS } from "@/lib/input-assist";
 
 const API_ERROR_MESSAGE =
   "Speaking feedback could not be generated. Your transcript was not lost. Please try again.";
@@ -350,6 +351,7 @@ export default function SpeakingPage() {
                     readOnly={generatingFeedback || Boolean(feedback)}
                     onChange={(e) => setTranscript(e.target.value)}
                     rows={5}
+                    {...DISABLE_WRITING_ASSIST_PROPS}
                   />
                   {feedback ? (
                     <p className="mt-1 text-tiny text-ink-subtle">
