@@ -166,46 +166,46 @@ export default function ReadingPage() {
               </div>
 
               <ol className="space-y-4">
-                {payload.questions.map((q, i) => (
-                  <li key={q.id} className="card p-4">
-                    <div className="flex items-baseline gap-3">
-                      <span className="font-mono text-tiny text-ink-subtle">Q{i + 1}</span>
-                      <p className="text-small">{q.prompt}</p>
-                    </div>
-                    {q.options ? (
-                      <div className="mt-3 grid gap-1.5">
-                        {q.options.map((opt) => (
-                          <label key={opt} className="flex items-center gap-2 text-small">
-                            <input
-                              type="radio"
-                              name={q.id}
-                              value={opt}
-                              checked={answers[q.id] === opt}
-                              onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                            />
-                            <span>{opt}</span>
-                          </label>
-                        ))}
+                {payload.questions.map((q, i) => {
+                  const answerOptions = answerOptionsForQuestion(q);
+                  return (
+                    <li key={q.id} className="card p-4">
+                      <div className="flex items-baseline gap-3">
+                        <span className="font-mono text-tiny text-ink-subtle">Q{i + 1}</span>
+                        <p className="text-small">{q.prompt}</p>
                       </div>
-                    ) : (
-                      <input
-                        type="text"
-                        className="input mt-3"
-                        placeholder="Your answer"
-                        value={answers[q.id] ?? ""}
-                        onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
-                      />
-                    )}
-                    {checked && (
-                      <div className="mt-3 space-y-1.5 border-t border-line pt-3 text-small">
-                        <div className={normalize(answers[q.id] ?? "") === normalize(q.answer) ? "text-success" : "text-error"}>
-                          {normalize(answers[q.id] ?? "") === normalize(q.answer) ? "Correct" : `Correct answer: ${q.answer}`}
+                      {answerOptions ? (
+                        <select
+                          className="input mt-3 max-w-xs"
+                          value={answers[q.id] ?? ""}
+                          onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                          aria-label={`Answer for question ${i + 1}`}
+                        >
+                          <option value="">Select answer</option>
+                          {answerOptions.map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          className="input mt-3"
+                          placeholder="Your answer"
+                          value={answers[q.id] ?? ""}
+                          onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
+                        />
+                      )}
+                      {checked && (
+                        <div className="mt-3 space-y-1.5 border-t border-line pt-3 text-small">
+                          <div className={normalize(answers[q.id] ?? "") === normalize(q.answer) ? "text-success" : "text-error"}>
+                            {normalize(answers[q.id] ?? "") === normalize(q.answer) ? "Correct" : `Correct answer: ${q.answer}`}
+                          </div>
+                          <p className="text-tiny text-ink-subtle">{q.explanation}</p>
                         </div>
-                        <p className="text-tiny text-ink-subtle">{q.explanation}</p>
-                      </div>
-                    )}
-                  </li>
-                ))}
+                      )}
+                    </li>
+                  );
+                })}
               </ol>
 
               <div className="flex items-center gap-3">
@@ -234,6 +234,16 @@ export default function ReadingPage() {
 
 function normalize(s: string | undefined): string {
   return (s ?? "").trim().toLowerCase();
+}
+
+function answerOptionsForQuestion(q: ReadingQuestion): string[] | null {
+  if (q.type === "reading_true_false_not_given") {
+    return ["True", "False", "Not Given"];
+  }
+  if (q.type === "reading_yes_no_not_given") {
+    return ["Yes", "No", "Not Given"];
+  }
+  return q.options ?? null;
 }
 
 function readingMistakeCode(q: ReadingQuestion, userAnswer: string): MistakeCode {
