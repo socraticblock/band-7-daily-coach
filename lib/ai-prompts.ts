@@ -19,6 +19,7 @@ You MUST:
 - Do not save two mistakes with the same excerpt.
 - Use the four official IELTS Writing criteria: Task Achievement/Task Response, Coherence and Cohesion, Lexical Resource, Grammatical Range and Accuracy.
 - Practice band is a range like ["band6_0", "band6_5"], not a single value.
+- Use exact band keys only: band5_5, band6_0, band6_5, band7_0, band7_5, band8_0. Do not wrap them in angle brackets.
 
 You MUST NOT:
 - Claim an official IELTS score.
@@ -47,7 +48,7 @@ ${text}
 
 Return JSON of shape:
 {
-  "practiceBandRange": ["<band6_0>", "<band6_5>"],
+  "practiceBandRange": ["band6_0", "band6_5"],
   "criteria": {
     "taskResponse": { "score": 0-9, "comment": "..." },
     "coherenceCohesion": { "score": 0-9, "comment": "..." },
@@ -65,6 +66,7 @@ Return JSON of shape:
 }
 
 Allowed mistake codes for writing: W1, W2, W3, W4, W5, W6, W7, W8, W9, W10.
+Allowed band keys: band5_5, band6_0, band6_5, band7_0, band7_5, band8_0.
 Pick the highest-leverage 1-3. Do not exceed 3.
 Each savedMistakes excerpt must be a unique verbatim span from the student response.
 Each improvedExcerpt must improve only its paired excerpt. If you cannot provide a direct improvedExcerpt, omit that saved mistake.`;
@@ -78,6 +80,7 @@ You MUST:
 - Use the four official IELTS Speaking criteria: Fluency and Coherence, Lexical Resource, Grammatical Range and Accuracy, Pronunciation.
 - Pronunciation is an AI estimate, not an examiner-grade assessment. Always say so.
 - Practice band is a range like ["band6_0", "band6_5"], not a single value.
+- Use exact band keys only: band5_5, band6_0, band6_5, band7_0, band7_5, band8_0. Do not wrap them in angle brackets.
 - Provide 2 better phrase suggestions that swap in for original phrases verbatim from the transcript.
 
 You MUST NOT:
@@ -109,7 +112,7 @@ ANSWER LENGTH: ${answerSeconds} seconds.
 
 Return JSON of shape:
 {
-  "practiceBandRange": ["<band6_0>", "<band6_5>"],
+  "practiceBandRange": ["band6_0", "band6_5"],
   "fluencyCoherence": { "score": 0-9, "comment": "..." },
   "lexicalResource": { "score": 0-9, "comment": "..." },
   "grammaticalRange": { "score": 0-9, "comment": "..." },
@@ -125,6 +128,7 @@ Return JSON of shape:
 }
 
 Allowed mistake codes for speaking: S1, S2, S3, S4, S5, S6, S7, S8.
+Allowed band keys: band5_5, band6_0, band6_5, band7_0, band7_5, band8_0.
 Pick the highest-leverage 2-3. Do not exceed 3.`;
 
 // ----------------------------------------------------------------------------
