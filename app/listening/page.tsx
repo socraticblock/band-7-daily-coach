@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
+import { PracticeModeGuide } from "@/components/ielts/PracticeModeGuide";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, ListeningPayload, ListeningQuestion, MistakeCode } from "@/lib/types";
 import { detectAudioCapabilities, type AudioPlaybackCapabilities } from "@/lib/audio-fallbacks";
@@ -12,6 +13,8 @@ export default function ListeningPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [submittedAnswers, setSubmittedAnswers] = useState<Record<string, string> | null>(null);
+  const [confirmCheckWithBlanks, setConfirmCheckWithBlanks] = useState(false);
   const [showTranscript, setShowTranscript] = useState(false);
   const [checked, setChecked] = useState(false);
   const [cap, setCap] = useState<AudioPlaybackCapabilities | null>(null);
@@ -52,57 +55,77 @@ export default function ListeningPage() {
     setUserContentState((current) => markContentStarted(current, selectedId));
   }, [selectedId, setUserContentState]);
 
+  const reviewAnswers = submittedAnswers ?? answers;
+
   const score = payload?.questions.reduce(
-    (acc, q) => (normalize(answers[q.id]) === normalize(q.answer) ? acc + 1 : acc),
+    (acc, q) => (normalize(reviewAnswers[q.id]) === normalize(q.answer) ? acc + 1 : acc),
     0,
   ) ?? 0;
 
-  const checkAnswers = () => {
-    if (selected && payload && !checked) {
-      setUserContentState((current) =>
-        markContentAttempted(current, selected.id, {
-          score: payload.questions.length > 0 ? score / payload.questions.length : 0,
-          receptiveMastery: true,
-        }),
-      );
-      const wrongQuestions = payload.questions.filter((q) => normalize(answers[q.id]) !== normalize(q.answer));
-      if (wrongQuestions.length > 0) {
-        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        const next = [...mistakes];
-        for (const q of wrongQuestions) {
-          const duplicate = next.some((card) =>
-            card.sourceSkill === "listening" &&
-            card.sourceContentId === selected.id &&
-            card.front === q.prompt &&
-            card.expectedAnswer === q.answer
-          );
-          if (duplicate) continue;
-          next.push({
-            id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            userId: profile.id,
-            sourceSkill: "listening",
-            sourceContentId: selected.id,
-            code: listeningMistakeCode(q, answers[q.id] ?? ""),
-            front: q.prompt,
-            expectedAnswer: q.answer,
-            explanation: listeningExplanation(q),
-            createdAt: new Date().toISOString(),
-            reviewDueAt: tomorrow,
-            reviewStage: 0,
-            reviewCount: 0,
-            mastered: false,
-          });
-        }
-        const savedCount = next.length - mistakes.length;
-        setMistakes(next);
-        setSavedMessage(savedCount > 0
-          ? `Saved ${savedCount} listening mistake${savedCount === 1 ? "" : "s"} to Error Notebook.`
-          : "Listening mistakes were already saved to Error Notebook.");
-      } else {
-        setSavedMessage(null);
+  const performCheck = () => {
+    if (!selected || !payload || checked) return;
+    const snapshot = { ...answers };
+    setSubmittedAnswers(snapshot);
+    setConfirmCheckWithBlanks(false);
+
+    const computedScore = payload.questions.reduce(
+      (acc, q) => (normalize(snapshot[q.id]) === normalize(q.answer) ? acc + 1 : acc),
+      0,
+    );
+
+    setUserContentState((current) =>
+      markContentAttempted(current, selected.id, {
+        score: payload.questions.length > 0 ? computedScore / payload.questions.length : 0,
+        receptiveMastery: true,
+      }),
+    );
+    const wrongQuestions = payload.questions.filter((q) => normalize(snapshot[q.id]) !== normalize(q.answer));
+    if (wrongQuestions.length > 0) {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const next = [...mistakes];
+      for (const q of wrongQuestions) {
+        const duplicate = next.some((card) =>
+          card.sourceSkill === "listening" &&
+          card.sourceContentId === selected.id &&
+          card.front === q.prompt &&
+          card.expectedAnswer === q.answer
+        );
+        if (duplicate) continue;
+        next.push({
+          id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          userId: profile.id,
+          sourceSkill: "listening",
+          sourceContentId: selected.id,
+          code: listeningMistakeCode(q, snapshot[q.id] ?? ""),
+          front: q.prompt,
+          expectedAnswer: q.answer,
+          explanation: listeningExplanation(q),
+          createdAt: new Date().toISOString(),
+          reviewDueAt: tomorrow,
+          reviewStage: 0,
+          reviewCount: 0,
+          mastered: false,
+        });
       }
+      const savedCount = next.length - mistakes.length;
+      setMistakes(next);
+      setSavedMessage(savedCount > 0
+        ? `Saved ${savedCount} listening mistake${savedCount === 1 ? "" : "s"} to Error Notebook.`
+        : "Listening mistakes were already saved to Error Notebook.");
+    } else {
+      setSavedMessage(null);
     }
     setChecked(true);
+  };
+
+  const checkAnswers = () => {
+    if (checked || !payload) return;
+    const unansweredCount = payload.questions.filter((q) => !answers[q.id]?.trim()).length;
+    if (unansweredCount > 0 && !confirmCheckWithBlanks) {
+      setConfirmCheckWithBlanks(true);
+      return;
+    }
+    performCheck();
   };
 
   return (
@@ -118,6 +141,8 @@ export default function ListeningPage() {
                     if (missionContentId && p.id !== missionContentId) return;
                     setSelectedId(p.id);
                     setAnswers({});
+                    setSubmittedAnswers(null);
+                    setConfirmCheckWithBlanks(false);
                     setShowTranscript(false);
                     setChecked(false);
                     setSavedMessage(null);
@@ -162,6 +187,7 @@ export default function ListeningPage() {
                   Mission item
                 </div>
               )}
+              <PracticeModeGuide skill="listening" />
               <div>
                 <p className="label">Listening</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>
@@ -176,7 +202,7 @@ export default function ListeningPage() {
                   <>
                     <audio src={payload.audioUrl} controls className="mt-3 w-full" preload="metadata" />
                     <p className="mt-2 text-tiny text-ink-subtle">
-                      Transcript is for review after answering.
+                      Practice tip: try the audio once first. Then replay only during review.
                     </p>
                     {cap && cap.recommendedAction === "tap_to_play" && (
                       <p className="mt-2 text-tiny text-ink-subtle">
@@ -207,6 +233,7 @@ export default function ListeningPage() {
                               name={q.id}
                               value={opt}
                               checked={answers[q.id] === opt}
+                              disabled={checked}
                               onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                             />
                             <span>{opt}</span>
@@ -220,18 +247,20 @@ export default function ListeningPage() {
                         className="input mt-3"
                         placeholder="Your answer"
                         value={answers[q.id] ?? ""}
+                        disabled={checked}
+                        readOnly={checked}
                         onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                       />
                     )}
                     {checked && (
-                      <AnswerReview q={q} userAnswer={answers[q.id] ?? ""} />
+                      <AnswerReview q={q} userAnswer={reviewAnswers[q.id] ?? ""} />
                     )}
                   </li>
                 ))}
               </ol>
 
               <div className="flex flex-wrap items-center gap-3">
-                <button onClick={checkAnswers} className="btn-accent btn-sm">
+                <button onClick={checkAnswers} disabled={checked} className="btn-accent btn-sm">
                   Check answers
                 </button>
                 <button
@@ -250,8 +279,24 @@ export default function ListeningPage() {
 
               {!checked && (
                 <p className="text-tiny text-ink-subtle">
-                  Transcript is for review after checking answers.
+                  Transcript is hidden during the attempt, like the real exam. Use it only after checking your answers.
                 </p>
+              )}
+
+              {confirmCheckWithBlanks && !checked && payload && (
+                <div className="card border-warn/40 bg-warn/5 p-4 text-small">
+                  <p className="text-warn">
+                    You still have {payload.questions.filter((q) => !answers[q.id]?.trim()).length} unanswered question{payload.questions.filter((q) => !answers[q.id]?.trim()).length === 1 ? "" : "s"}. Check anyway?
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <button onClick={performCheck} className="btn-accent btn-sm">
+                      Check anyway
+                    </button>
+                    <button onClick={() => setConfirmCheckWithBlanks(false)} className="btn-ghost btn-sm">
+                      Keep answering
+                    </button>
+                  </div>
+                </div>
               )}
 
               {savedMessage && (
@@ -263,7 +308,9 @@ export default function ListeningPage() {
               {showTranscript && (
                 <div className="card p-5 fade-in">
                   <p className="label">Transcript</p>
-                  <p className="mt-1 text-tiny text-ink-subtle">Review only after answering.</p>
+                  <p className="mt-1 text-tiny text-ink-subtle">
+                    Transcript is hidden during the attempt, like the real exam. Use it only after checking your answers.
+                  </p>
                   <p className="mt-2 whitespace-pre-line font-serif text-small leading-relaxed text-ink-muted">
                     {payload.transcript}
                   </p>

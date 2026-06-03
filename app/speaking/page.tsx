@@ -4,24 +4,30 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { AiDisclosureNotice } from "@/components/ui/AiDisclosureNotice";
+import { PracticeModeGuide } from "@/components/ielts/PracticeModeGuide";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, SpeakingPayload, SpeakingFeedback, MistakeCode } from "@/lib/types";
 import { useAiDisclosureAccepted, useMistakes, useProfile, useSpeakingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
 import { detectRecordingCapabilities, recordOnce, type RecordingCapabilities } from "@/lib/audio-fallbacks";
-import { BAND_NUMERIC } from "@/lib/types";
+import { bandRangeAverage, formatBandRange } from "@/lib/band-utils";
 import { requestSpeakingFeedback, requestTranscription } from "@/lib/feedback-client";
+
+const API_ERROR_MESSAGE =
+  "Speaking feedback could not be generated. Your transcript was not lost. Please try again.";
 
 export default function SpeakingPage() {
   const [prompts, setPrompts] = useState<ContentItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [cap, setCap] = useState<RecordingCapabilities | null>(null);
   const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const [generatingFeedback, setGeneratingFeedback] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [recordedDurationSeconds, setRecordedDurationSeconds] = useState(0);
   const [transcript, setTranscript] = useState("");
   const [transcriptIsDemo, setTranscriptIsDemo] = useState(false);
   const [feedback, setFeedback] = useState<SpeakingFeedback | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [missionContentId, setMissionContentId] = useState<string | null>(null);
   const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
@@ -60,13 +66,36 @@ export default function SpeakingPage() {
     setUserContentState((current) => markContentStarted(current, selectedId));
   }, [selectedId, setUserContentState]);
 
-  const startRecording = async () => {
-    if (!payload || !aiDisclosureAccepted) return;
-    setError(null);
+  const resetAttempt = () => {
     setAudioUrl(null);
     setTranscript("");
     setTranscriptIsDemo(false);
     setFeedback(null);
+    setError(null);
+    setRecordedDurationSeconds(0);
+    setTranscribing(false);
+    setGeneratingFeedback(false);
+  };
+
+  const transcribeAudio = async (blob: Blob, durationSeconds: number) => {
+    setTranscribing(true);
+    setError(null);
+    setFeedback(null);
+    setRecordedDurationSeconds(durationSeconds);
+    try {
+      const trJson = await requestTranscription(blob);
+      setTranscript(trJson.transcript);
+      setTranscriptIsDemo(trJson.isDemo === true);
+    } catch {
+      setError("Transcription failed. Please try recording or uploading again.");
+    } finally {
+      setTranscribing(false);
+    }
+  };
+
+  const startRecording = async () => {
+    if (!payload || !aiDisclosureAccepted) return;
+    resetAttempt();
     setElapsed(0);
     setRecording(true);
     try {
@@ -74,29 +103,7 @@ export default function SpeakingPage() {
       setRecording(false);
       const url = URL.createObjectURL(result.blob);
       setAudioUrl(url);
-
-      // Transcribe
-      const trJson = await requestTranscription(result.blob);
-      setTranscript(trJson.transcript);
-      setTranscriptIsDemo(trJson.isDemo === true);
-
-      // Feedback
-      const fbJson = await requestSpeakingFeedback({
-        part: payload.part,
-        prompt: payload.prompt,
-        transcript: trJson.transcript,
-        transcriptConfidence: trJson.confidence,
-        answerSeconds: result.durationSeconds,
-      });
-      setFeedback(fbJson);
-      const estimatedScore = (BAND_NUMERIC[fbJson.practiceBandRange[0]] + BAND_NUMERIC[fbJson.practiceBandRange[1]]) / 2;
-      if (selected?.id) {
-        setUserContentState((current) =>
-          markContentAttempted(current, selected.id, { score: estimatedScore, mastery: "attempted" }),
-        );
-      }
-      setHistory((h) => [...h, { ...fbJson }]);
-      saveSpeakingMistakes(fbJson);
+      await transcribeAudio(result.blob, result.durationSeconds);
     } catch (e) {
       setRecording(false);
       setError((e as Error).message);
@@ -105,34 +112,9 @@ export default function SpeakingPage() {
 
   const handleUpload = async (file: File) => {
     if (!payload || !aiDisclosureAccepted) return;
-    setError(null);
+    resetAttempt();
     setAudioUrl(URL.createObjectURL(file));
-    setFeedback(null);
-    setTranscript("");
-    setTranscriptIsDemo(false);
-    try {
-      const trJson = await requestTranscription(file);
-      setTranscript(trJson.transcript);
-      setTranscriptIsDemo(trJson.isDemo === true);
-      const fbJson = await requestSpeakingFeedback({
-        part: payload.part,
-        prompt: payload.prompt,
-        transcript: trJson.transcript,
-        transcriptConfidence: trJson.confidence,
-        answerSeconds: 0,
-      });
-      setFeedback(fbJson);
-      const estimatedScore = (BAND_NUMERIC[fbJson.practiceBandRange[0]] + BAND_NUMERIC[fbJson.practiceBandRange[1]]) / 2;
-      if (selected?.id) {
-        setUserContentState((current) =>
-          markContentAttempted(current, selected.id, { score: estimatedScore, mastery: "attempted" }),
-        );
-      }
-      setHistory((h) => [...h, { ...fbJson }]);
-      saveSpeakingMistakes(fbJson);
-    } catch (e) {
-      setError((e as Error).message);
-    }
+    await transcribeAudio(file, 0);
   };
 
   const saveSpeakingMistakes = (fb: SpeakingFeedback) => {
@@ -174,6 +156,44 @@ export default function SpeakingPage() {
     });
   };
 
+  const generateFeedbackFromTranscript = async () => {
+    if (!payload || !selected?.id || !aiDisclosureAccepted) return;
+    if (!transcript.trim()) {
+      setError("Please record or upload an answer and review the transcript before generating feedback.");
+      return;
+    }
+
+    setError(null);
+    setFeedback(null);
+    setGeneratingFeedback(true);
+
+    try {
+      const fbJson = await requestSpeakingFeedback({
+        part: payload.part,
+        prompt: payload.prompt,
+        transcript,
+        transcriptConfidence: transcriptIsDemo ? "low" : "medium",
+        answerSeconds: recordedDurationSeconds,
+      });
+      setFeedback(fbJson);
+      const estimatedScore = bandRangeAverage(fbJson.practiceBandRange);
+      setUserContentState((current) =>
+        markContentAttempted(current, selected.id, {
+          ...(estimatedScore === null ? {} : { score: estimatedScore }),
+          mastery: "attempted",
+        }),
+      );
+      setHistory((h) => [...h, { ...fbJson }]);
+      saveSpeakingMistakes(fbJson);
+    } catch {
+      setError(API_ERROR_MESSAGE);
+    } finally {
+      setGeneratingFeedback(false);
+    }
+  };
+
+  const busy = recording || transcribing || generatingFeedback;
+
   return (
     <AppShell>
       <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
@@ -186,11 +206,7 @@ export default function SpeakingPage() {
                   onClick={() => {
                     if (missionContentId && p.id !== missionContentId) return;
                     setSelectedId(p.id);
-                    setAudioUrl(null);
-                    setTranscript("");
-                    setTranscriptIsDemo(false);
-                    setFeedback(null);
-                    setError(null);
+                    resetAttempt();
                   }}
                   disabled={missionContentId !== null && p.id !== missionContentId}
                   className={`w-full rounded border px-3 py-2 text-left text-small transition-colors ${
@@ -227,6 +243,7 @@ export default function SpeakingPage() {
                   Mission item
                 </div>
               )}
+              <PracticeModeGuide skill="speaking" />
               <div>
                 <p className="label">Part {payload.part}</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>
@@ -256,13 +273,13 @@ export default function SpeakingPage() {
                     <p className="text-ink-muted">
                       You can upload an audio file instead. Recording also works on most modern phones and laptops.
                     </p>
-                    <label className={`btn-ghost btn-sm ${aiDisclosureAccepted ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
+                    <label className={`btn-ghost btn-sm ${aiDisclosureAccepted && !busy ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
                       Upload audio file
                       <input
                         type="file"
                         accept="audio/*"
                         className="hidden"
-                        disabled={!aiDisclosureAccepted}
+                        disabled={!aiDisclosureAccepted || busy}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
                           if (f) handleUpload(f);
@@ -274,7 +291,7 @@ export default function SpeakingPage() {
                 {cap && cap.supported && (
                   <div className="flex flex-wrap items-center gap-3">
                     {!recording ? (
-                      <button onClick={startRecording} className="btn-accent" disabled={loading || !aiDisclosureAccepted}>
+                      <button onClick={startRecording} className="btn-accent" disabled={busy || !aiDisclosureAccepted}>
                         Start recording
                       </button>
                     ) : (
@@ -284,13 +301,13 @@ export default function SpeakingPage() {
                       </div>
                     )}
                     <span className="text-tiny text-ink-subtle">or</span>
-                    <label className={`btn-ghost btn-sm ${aiDisclosureAccepted ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
+                    <label className={`btn-ghost btn-sm ${aiDisclosureAccepted && !busy ? "cursor-pointer" : "cursor-not-allowed opacity-50"}`}>
                       Upload audio file
                       <input
                         type="file"
                         accept="audio/*"
                         className="hidden"
-                        disabled={!aiDisclosureAccepted}
+                        disabled={!aiDisclosureAccepted || busy}
                         onChange={(e) => {
                           const f = e.target.files?.[0];
                           if (f) handleUpload(f);
@@ -301,6 +318,15 @@ export default function SpeakingPage() {
                 )}
               </div>
 
+              {transcribing && (
+                <div className="card border-accent/30 bg-accent/5 p-4 text-small text-ink-muted">
+                  <p className="font-medium text-ink">Transcribing your answer…</p>
+                  <p className="mt-2 text-tiny text-ink-subtle">
+                    Please wait while your speech is converted to text. You can review and correct it before generating feedback.
+                  </p>
+                </div>
+              )}
+
               {audioUrl && (
                 <div className="card p-4">
                   <p className="label mb-2">Your recording</p>
@@ -308,32 +334,61 @@ export default function SpeakingPage() {
                 </div>
               )}
 
-              {transcript && (
+              {transcript && !transcribing && (
                 <div className="card p-4">
                   <div className="flex items-baseline justify-between">
-                    <p className="label">Transcript</p>
-                    <p className="text-tiny text-ink-subtle">
-                      AI confidence: {feedback?.transcriptConfidence ?? "—"}
-                    </p>
+                    <p className="label">{feedback ? "Transcript used for feedback" : "Review your transcript"}</p>
                   </div>
+                  {!feedback && (
+                    <p className="mt-1 text-small text-ink-muted">
+                      Correct any speech-to-text mistakes before generating feedback. Your feedback will be based on this transcript.
+                    </p>
+                  )}
                   <textarea
                     className="textarea mt-2 text-small"
                     value={transcript}
+                    readOnly={generatingFeedback || Boolean(feedback)}
                     onChange={(e) => setTranscript(e.target.value)}
                     rows={5}
                   />
-                  <p className="mt-1 text-tiny text-ink-subtle">
-                    Edit the transcript if Whisper misheard something. Feedback is based on what is shown above.
-                  </p>
+                  {feedback ? (
+                    <p className="mt-1 text-tiny text-ink-subtle">
+                      Feedback was generated from the transcript above. To change the transcript, record or upload again.
+                    </p>
+                  ) : (
+                    <p className="mt-1 text-tiny text-ink-subtle">
+                      Edit the transcript if speech-to-text misheard something.
+                    </p>
+                  )}
                   {transcriptIsDemo && (
                     <p className="mt-2 text-tiny text-warn">
                       Demo transcript - no real speech-to-text was used.
                     </p>
                   )}
+                  {!feedback && (
+                    <button
+                      onClick={generateFeedbackFromTranscript}
+                      disabled={generatingFeedback || !aiDisclosureAccepted}
+                      className="btn-accent btn-sm mt-3"
+                    >
+                      {generatingFeedback ? "Reviewing your speaking answer…" : "Generate feedback from transcript"}
+                    </button>
+                  )}
                 </div>
               )}
 
-              {loading && <p className="text-small text-ink-muted">Generating feedback…</p>}
+              {generatingFeedback && (
+                <div className="card border-accent/30 bg-accent/5 p-4 text-small text-ink-muted">
+                  <p className="font-medium text-ink">Reviewing your speaking answer…</p>
+                  <p className="mt-2">
+                    Your coach is checking fluency, vocabulary, grammar, and pronunciation clarity.
+                    Pronunciation feedback is AI-estimated.
+                  </p>
+                  <p className="mt-2 text-tiny text-ink-subtle">
+                    This usually takes 20–60 seconds. Please keep this tab open.
+                  </p>
+                </div>
+              )}
 
               {error && (
                 <div className="card border-error/40 bg-error/5 p-4 text-small text-error">
@@ -341,7 +396,14 @@ export default function SpeakingPage() {
                 </div>
               )}
 
-              {feedback && <SpeakingFeedbackView fb={feedback} />}
+              {feedback && (
+                <>
+                  <div className="card border-success/40 bg-success/5 p-4 text-small text-success">
+                    Speaking feedback ready. This is a practice estimate, not an official IELTS score.
+                  </div>
+                  <SpeakingFeedbackView fb={feedback} />
+                </>
+              )}
             </>
           )}
         </section>
@@ -351,7 +413,6 @@ export default function SpeakingPage() {
 }
 
 function SpeakingFeedbackView({ fb }: { fb: SpeakingFeedback }) {
-  const [low, high] = fb.practiceBandRange;
   return (
     <div className="space-y-4 fade-in">
       {fb.isDemo && (
@@ -362,7 +423,7 @@ function SpeakingFeedbackView({ fb }: { fb: SpeakingFeedback }) {
       <div className="card p-5">
         <p className="label">Practice band estimate</p>
         <div className="mt-1 text-subtitle font-semibold">
-          Band {BAND_NUMERIC[low].toFixed(1)} – {BAND_NUMERIC[high].toFixed(1)}
+          {formatBandRange(fb.practiceBandRange)}
         </div>
         <p className="mt-1 text-tiny text-ink-subtle">
           Estimate only. Pronunciation is an AI estimate, not examiner-grade.

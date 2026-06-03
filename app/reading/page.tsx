@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
+import { PracticeModeGuide } from "@/components/ielts/PracticeModeGuide";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, MistakeCode, ReadingPayload, ReadingQuestion } from "@/lib/types";
 import { useMistakes, useProfile, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
@@ -11,6 +12,8 @@ export default function ReadingPage() {
   const [items, setItems] = useState<ContentItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [submittedAnswers, setSubmittedAnswers] = useState<Record<string, string> | null>(null);
+  const [confirmCheckWithBlanks, setConfirmCheckWithBlanks] = useState(false);
   const [checked, setChecked] = useState(false);
   const [missionContentId, setMissionContentId] = useState<string | null>(null);
   const [invalidContentId, setInvalidContentId] = useState<string | null>(null);
@@ -44,57 +47,77 @@ export default function ReadingPage() {
     setUserContentState((current) => markContentStarted(current, selectedId));
   }, [selectedId, setUserContentState]);
 
+  const reviewAnswers = submittedAnswers ?? answers;
+
   const score = payload?.questions.reduce(
-    (acc, q) => (normalize(answers[q.id]) === normalize(q.answer) ? acc + 1 : acc),
+    (acc, q) => (normalize(reviewAnswers[q.id]) === normalize(q.answer) ? acc + 1 : acc),
     0,
   ) ?? 0;
 
-  const checkAnswers = () => {
-    if (selected && payload && !checked) {
-      setUserContentState((current) =>
-        markContentAttempted(current, selected.id, {
-          score: payload.questions.length > 0 ? score / payload.questions.length : 0,
-          receptiveMastery: true,
-        }),
-      );
-      const wrongQuestions = payload.questions.filter((q) => normalize(answers[q.id]) !== normalize(q.answer));
-      if (wrongQuestions.length > 0) {
-        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-        const next = [...mistakes];
-        for (const q of wrongQuestions) {
-          const duplicate = next.some((card) =>
-            card.sourceSkill === "reading" &&
-            card.sourceContentId === selected.id &&
-            card.front === q.prompt &&
-            card.expectedAnswer === q.answer
-          );
-          if (duplicate) continue;
-          next.push({
-            id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            userId: profile.id,
-            sourceSkill: "reading",
-            sourceContentId: selected.id,
-            code: readingMistakeCode(q, answers[q.id] ?? ""),
-            front: q.prompt,
-            expectedAnswer: q.answer,
-            explanation: q.explanation,
-            createdAt: new Date().toISOString(),
-            reviewDueAt: tomorrow,
-            reviewStage: 0,
-            reviewCount: 0,
-            mastered: false,
-          });
-        }
-        const savedCount = next.length - mistakes.length;
-        setMistakes(next);
-        setSavedMessage(savedCount > 0
-          ? `Saved ${savedCount} reading mistake${savedCount === 1 ? "" : "s"} to Error Notebook.`
-          : "Reading mistakes were already saved to Error Notebook.");
-      } else {
-        setSavedMessage(null);
+  const performCheck = () => {
+    if (!selected || !payload || checked) return;
+    const snapshot = { ...answers };
+    setSubmittedAnswers(snapshot);
+    setConfirmCheckWithBlanks(false);
+
+    const computedScore = payload.questions.reduce(
+      (acc, q) => (normalize(snapshot[q.id]) === normalize(q.answer) ? acc + 1 : acc),
+      0,
+    );
+
+    setUserContentState((current) =>
+      markContentAttempted(current, selected.id, {
+        score: payload.questions.length > 0 ? computedScore / payload.questions.length : 0,
+        receptiveMastery: true,
+      }),
+    );
+    const wrongQuestions = payload.questions.filter((q) => normalize(snapshot[q.id]) !== normalize(q.answer));
+    if (wrongQuestions.length > 0) {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      const next = [...mistakes];
+      for (const q of wrongQuestions) {
+        const duplicate = next.some((card) =>
+          card.sourceSkill === "reading" &&
+          card.sourceContentId === selected.id &&
+          card.front === q.prompt &&
+          card.expectedAnswer === q.answer
+        );
+        if (duplicate) continue;
+        next.push({
+          id: `mk-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          userId: profile.id,
+          sourceSkill: "reading",
+          sourceContentId: selected.id,
+          code: readingMistakeCode(q, snapshot[q.id] ?? ""),
+          front: q.prompt,
+          expectedAnswer: q.answer,
+          explanation: q.explanation,
+          createdAt: new Date().toISOString(),
+          reviewDueAt: tomorrow,
+          reviewStage: 0,
+          reviewCount: 0,
+          mastered: false,
+        });
       }
+      const savedCount = next.length - mistakes.length;
+      setMistakes(next);
+      setSavedMessage(savedCount > 0
+        ? `Saved ${savedCount} reading mistake${savedCount === 1 ? "" : "s"} to Error Notebook.`
+        : "Reading mistakes were already saved to Error Notebook.");
+    } else {
+      setSavedMessage(null);
     }
     setChecked(true);
+  };
+
+  const checkAnswers = () => {
+    if (checked || !payload) return;
+    const unansweredCount = payload.questions.filter((q) => !answers[q.id]?.trim()).length;
+    if (unansweredCount > 0 && !confirmCheckWithBlanks) {
+      setConfirmCheckWithBlanks(true);
+      return;
+    }
+    performCheck();
   };
 
   return (
@@ -110,6 +133,8 @@ export default function ReadingPage() {
                     if (missionContentId && p.id !== missionContentId) return;
                     setSelectedId(p.id);
                     setAnswers({});
+                    setSubmittedAnswers(null);
+                    setConfirmCheckWithBlanks(false);
                     setChecked(false);
                     setSavedMessage(null);
                   }}
@@ -153,6 +178,7 @@ export default function ReadingPage() {
                   Mission item
                 </div>
               )}
+              <PracticeModeGuide skill="reading" />
               <div>
                 <p className="label">Reading</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>
@@ -178,6 +204,7 @@ export default function ReadingPage() {
                         <select
                           className="input mt-3 max-w-xs"
                           value={answers[q.id] ?? ""}
+                          disabled={checked}
                           onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                           aria-label={`Answer for question ${i + 1}`}
                         >
@@ -192,14 +219,21 @@ export default function ReadingPage() {
                           className="input mt-3"
                           placeholder="Your answer"
                           value={answers[q.id] ?? ""}
+                          disabled={checked}
+                          readOnly={checked}
                           onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })}
                         />
                       )}
                       {checked && (
                         <div className="mt-3 space-y-1.5 border-t border-line pt-3 text-small">
-                          <div className={normalize(answers[q.id] ?? "") === normalize(q.answer) ? "text-success" : "text-error"}>
-                            {normalize(answers[q.id] ?? "") === normalize(q.answer) ? "Correct" : `Correct answer: ${q.answer}`}
+                          <div className={normalize(reviewAnswers[q.id] ?? "") === normalize(q.answer) ? "text-success" : "text-error"}>
+                            {normalize(reviewAnswers[q.id] ?? "") === normalize(q.answer) ? "Correct" : `Correct answer: ${q.answer}`}
                           </div>
+                          {q.evidenceQuote && (
+                            <p className="text-tiny text-ink-subtle">
+                              Evidence: “{q.evidenceQuote}”
+                            </p>
+                          )}
                           <p className="text-tiny text-ink-subtle">{q.explanation}</p>
                         </div>
                       )}
@@ -209,7 +243,7 @@ export default function ReadingPage() {
               </ol>
 
               <div className="flex items-center gap-3">
-                <button onClick={checkAnswers} className="btn-accent btn-sm">
+                <button onClick={checkAnswers} disabled={checked} className="btn-accent btn-sm">
                   Check answers
                 </button>
                 {checked && (
@@ -218,6 +252,22 @@ export default function ReadingPage() {
                   </span>
                 )}
               </div>
+
+              {confirmCheckWithBlanks && !checked && payload && (
+                <div className="card border-warn/40 bg-warn/5 p-4 text-small">
+                  <p className="text-warn">
+                    You still have {payload.questions.filter((q) => !answers[q.id]?.trim()).length} unanswered question{payload.questions.filter((q) => !answers[q.id]?.trim()).length === 1 ? "" : "s"}. Check anyway?
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-3">
+                    <button onClick={performCheck} className="btn-accent btn-sm">
+                      Check anyway
+                    </button>
+                    <button onClick={() => setConfirmCheckWithBlanks(false)} className="btn-ghost btn-sm">
+                      Keep answering
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {savedMessage && (
                 <div className="card border-success/40 bg-success/5 p-4 text-small text-success">

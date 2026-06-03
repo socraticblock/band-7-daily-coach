@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { AiDisclosureNotice } from "@/components/ui/AiDisclosureNotice";
+import { PracticeModeGuide } from "@/components/ielts/PracticeModeGuide";
 import { contentForSkill, getContentById } from "@/lib/content-loader";
 import type { ContentItem, WritingPayload, WritingFeedback, MistakeCode } from "@/lib/types";
 import { useAiDisclosureAccepted, useProfile, useMistakes, useWritingFeedback, useUserContentState, markContentAttempted, markContentStarted } from "@/lib/app-state";
@@ -175,14 +176,20 @@ export default function WritingPage() {
                   Mission item
                 </div>
               )}
+              <PracticeModeGuide skill="writing" />
               <div>
                 <p className="label">Prompt</p>
                 <h1 className="mt-1 font-serif text-title">{selected.title}</h1>
                 <p className="mt-3 text-body">{payload.prompt}</p>
                 {payload.minimumWords && (
-                  <p className="mt-2 text-tiny text-ink-subtle">
-                    Minimum words: {payload.minimumWords}
-                  </p>
+                  <>
+                    <p className="mt-2 text-tiny text-ink-subtle">
+                      Minimum words: {payload.minimumWords}
+                    </p>
+                    <p className="mt-1 text-tiny text-ink-subtle">
+                      In IELTS, answers below the minimum word count are penalised. You can still practise, but a full answer gives better feedback.
+                    </p>
+                  </>
                 )}
                 {payload.planningHints && payload.planningHints.length > 0 && (
                   <details className="mt-3">
