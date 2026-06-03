@@ -13,6 +13,7 @@ import {
   CLASSIFIER_SYSTEM,
   classifierUserTemplate,
 } from "@/lib/ai-prompts";
+import { normalizeBandRange } from "@/lib/band-utils";
 import { isValidMistakeCode } from "@/lib/mistake-taxonomy";
 import { mockWritingFeedback, mockSpeakingFeedback, mockTranscribe } from "./feedback-mock";
 
@@ -74,6 +75,14 @@ function parseJsonObject<T>(content: string): T {
   }
 }
 
+function normalizeFeedback<T extends WritingFeedback | SpeakingFeedback>(feedback: T): T {
+  const practiceBandRange = normalizeBandRange(feedback.practiceBandRange);
+  if (!practiceBandRange) {
+    throw new Error("AI returned an invalid band range. Please retry.");
+  }
+  return { ...feedback, practiceBandRange };
+}
+
 async function postChat(provider: ChatProvider, body: unknown): Promise<string> {
   const res = await fetch(provider.endpoint, {
     method: "POST",
@@ -115,7 +124,7 @@ export async function generateFeedback(input: FeedbackInput): Promise<WritingFee
     ],
     temperature: 0.4,
   });
-  return parseJsonObject<WritingFeedback | SpeakingFeedback>(content);
+  return normalizeFeedback(parseJsonObject<WritingFeedback | SpeakingFeedback>(content));
 }
 
 export async function generateClassification(input: ClassifierInput): Promise<ClassifierOutput> {
